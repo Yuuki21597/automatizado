@@ -9,6 +9,7 @@ export HISTCONTROL=ignoreboth:erasedups
 export NOMBRE_EQUIPO=$(lsblk -Po MOUNTPOINT,LABEL | grep '"/"' | awk -F '"' '{print $4}')
 export REPO="$HOME/Documentos/Repositorio"
 export AUTO="$REPO/automatizado"
+export SM="$AUTO/script_maestro.sh"
 
 # Sistema.
 alias reboot='systemctl reboot'
@@ -24,3 +25,6 @@ alias grep='grep --color=auto'
 alias home='cd $HOME'
 alias {repo,repositorio}='cd $REPO'
 
+# Atajos para comandos del script maestro.
+alias sm='$SM'
+alias start='$SM inicio'
