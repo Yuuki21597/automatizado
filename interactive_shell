@@ -12,10 +12,9 @@ export AUTO="$REPO/automatizado"
 export SM="$AUTO/script_maestro.sh"
 
 # Sistema.
-alias reboot='systemctl reboot'
-alias shutdown='systemctl poweroff'
-alias update='yay -Syu'
-alias clear-update='yay -Rns $(yay -Qdttq)'
+alias reiniciar='systemctl reboot'
+alias apagar='systemctl poweroff'
+alias actualizar='yay -Syu'
 
 # Comandos generales para la terminal.
 alias ls='ls --color=auto'
@@ -27,4 +26,5 @@ alias {repo,repositorio}='cd $REPO'
 
 # Atajos para comandos del script maestro.
 alias sm='$SM'
-alias start='$SM inicio'
+alias inicio='$SM inicio'
+alias limpiar-actualización='$SM consola limpiar-actualización'
