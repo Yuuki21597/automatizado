@@ -1,0 +1,7 @@
+! -- Escalado general --
+Xft.dpi: 80				! 0.533 <- Entregar a QT. La escala al 100% es 96. Sin embargo, yo no uso 80% sino 80 de 96.
+
+! -- Tipografía --
+Xft.hinting: true
+Xft.hintstyle: hintslight
+Xcursor.theme: Bibata-Modern-Amber

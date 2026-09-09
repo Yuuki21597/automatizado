@@ -1,0 +1,26 @@
+#
+# ~/bashrc
+#
+
+# No hacer nada si no es una consola interactiva.
+[[ $- != *i* ]] && return
+
+export HISTCONTROL=ignoreboth:erasedups
+export NOMBRE_EQUIPO=$(lsblk -Po MOUNTPOINT,LABEL | grep '"/"' | awk -F '"' '{print $4}')
+export REPO="$HOME/Documentos/Repositorio"
+export AUTO="$REPO/automatizado"
+
+# Sistema.
+alias reboot='systemctl reboot'
+alias shutdown='systemctl poweroff'
+alias update='yay -Syu'
+alias clear-update='yay -Rns $(yay -Qdttq)'
+
+# Comandos generales para la terminal.
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+
+# Atajos de y hacia directorios.
+alias home='cd $HOME'
+alias {repo,repositorio}='cd $REPO'
+
