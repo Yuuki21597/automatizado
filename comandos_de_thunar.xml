@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+<action>
+	<icon>utilities-terminal</icon>
+	<name>Abrir terminal aquí</name>
+	<submenu></submenu>
+	<unique-id>1745403719018553-1</unique-id>
+	<command>kitty %f</command>
+	<description></description>
+	<range></range>
+	<patterns>*</patterns>
+	<startup-notify/>
+	<directories/>
+</action>
+<action>
+	<icon>git</icon>
+	<name>Repositorio</name>
+	<submenu></submenu>
+	<unique-id>1750064080620060-1</unique-id>
+	<command>code %f</command>
+	<description>Abre el repositorio git de la carpeta, si este existe.</description>
+	<range>*</range>
+	<patterns>*</patterns>
+	<directories/>
+</action>
+<action>
+	<icon>emblem-symbolic-link</icon>
+	<name>Crear enlace simbólico</name>
+	<submenu></submenu>
+	<unique-id>1746253274849714-1</unique-id>
+	<command>ln -s %f %f.symlink</command>
+	<description></description>
+	<range>*</range>
+	<patterns>*</patterns>
+	<directories/>
+	<audio-files/>
+	<image-files/>
+	<other-files/>
+	<text-files/>
+	<video-files/>
+</action>
+</actions>
