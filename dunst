@@ -1,0 +1,43 @@
+[global]
+	follow = keyboard
+	enable_posix_regex = true
+	width = (0, 455)
+	height = (0, 768)
+	notification_limit = 0
+	origin = top-right
+	offset = (0, 26)
+	progress_bar = true
+	icon_corner_radius = 5
+	separator_height = 0
+	padding = 5
+	horizontal_padding = 5
+	frame_width = 0
+	gap_size = 0
+	sort = update
+	force_xwayland = false
+	font = "sans 10"
+    format = "<b>%s</b>\n%b"
+	icon_theme = Papirus-Dark
+	enable_recursive_icon_lookup = false
+	history_length = 10
+	corner_radius = 5
+	mouse_left_click = context
+	mouse_middle_click = none
+	mouse_right_click = close_current
+	ignore_dbusclose = true
+	background = "#7bb074d9"
+	frame_color = "#7bb074d9"
+	fullscreen = pushback
+	icon_position = left
+	urgency = normal
+	dmenu = rofi -dmenu -p "Notificación"
+	browser = vivaldi
+	timeout = 4
+
+[urgency_critical]
+	background = "#780606"
+	foreground = "#eeeeee"
+	timeout = 0
+
+[urgency_low]
+	timeout = 2
