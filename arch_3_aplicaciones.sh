@@ -153,11 +153,14 @@ $gestor dolphin-emu
 
 # Hay que instalar un helper puesto que VSCode está en el AUR. Mi elección es yay.
 $gestor base-devel
-git clone https://aur.archlinux.org/yay.git
-# Si llegase a fallar por algo relacionado con connection refused, es porque el DNS no puede resolver el nombre. Se arregla exportando de nuevo el enlace simbólico para systemd.
-sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
-cd yay
-makepkg -si
+if ! command -v yay > /dev/null; then
+	git clone https://aur.archlinux.org/yay.git
+	# Si llegase a fallar por algo relacionado con connection refused, es porque el DNS no puede resolver el nombre. Se arregla exportando de nuevo el enlace simbólico para systemd.
+	sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+	cd yay
+	makepkg -si
+	rm -rf yay
+fi
 
 instalador=("yay" "-S" "--needed")
 gestor="${instalador[@]}"
@@ -178,7 +181,7 @@ $gestor nomacs
 $gestor bibata-cursor-git papirus-icon-theme
 
 # Esto forma parte de la personalización de la consola, pero se instala desde el AUR, así que... hasta aquí.
-$gestor -S oh-my-posh-git
+$gestor oh-my-posh-git
 
 # Pokéfinder, para RNG en Pokémon
 $gestor pokefinder
@@ -193,15 +196,15 @@ $gestor qtile-extras
 $gestor sfml vbam-wx melonds azahar-git ryujinx --editmenu
 
 # Steam
-sudo nano /etc/pacman.conf # Hay que activar el repositorio multilib
-sudo pacman -Syu --needed steam
+if ! command -v steam > /dev/null; then
+	sudo nano /etc/pacman.conf # Hay que activar el repositorio multilib
+	sudo pacman -Syu --needed steam
+fi
 
 if [ "$EQUIPO" == "Yuusha #03" ]; then
 	paquetes=("brightnessctl")
-    $gestor "${paquetes_1[@]}"
+    $gestor "${paquetes[@]}"
 fi
 
-$gestor "${paquetes_1[@]}"
-
-chmod +x "$RAIZ/arch_4_sysmlinks.sh"
-$RAIZ/arch_4_sysmlinks.sh
+chmod +x "$RAIZ/arch_4_symlinks.sh"
+$RAIZ/arch_4_symlinks.sh

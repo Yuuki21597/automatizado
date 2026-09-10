@@ -5,6 +5,12 @@
 # No hacer nada si no es una consola interactiva.
 [[ $- != *i* ]] && return
 
+if command -v oh-my-posh > /dev/null; then
+	eval "$(oh-my-posh init bash --config "$HOME/.config/oh-my-posh/$USER.omp.json")"
+else
+	PS1='[\u@\h \W]\$ '
+fi
+
 export HISTCONTROL=ignoreboth:erasedups
 export NOMBRE_EQUIPO=$(lsblk -Po MOUNTPOINT,LABEL | grep '"/"' | awk -F '"' '{print $4}')
 export REPO="$HOME/Documentos/Repositorio"
@@ -26,5 +32,5 @@ alias {repo,repositorio}='cd $REPO'
 
 # Atajos para comandos del script maestro.
 alias sm='$SM'
-alias inicio='$SM inicio'
+alias iniciar='$SM inicio'
 alias limpiar-actualización='$SM consola limpiar-actualización'

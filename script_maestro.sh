@@ -22,6 +22,10 @@ notificación() {
 	nt "$1" "${2:-$tray_icon}" "${3:-Script maestro}" "$4"
 }
 
+reemplazar_con_variables_globales() {
+	envsubst < "$1" > "$2"
+}
+
 case $1 in
 # ------------------------------------------------------------------------------
 # Sección 1: Arranque del sistema.
@@ -81,8 +85,21 @@ case $1 in
 				fi
 			;;
 			
-			generar-configuracion)
-				envsubst < "$3" > "$4"
+			reemplazar-comodines)
+				reemplazar_con_variables_globales "$3" "$4"
+			;;
+
+			generar-configuración)
+				# Rofi.
+				reemplazar_con_variables_globales "$AUTO/plantilla_de_rofi" "$AUTO/rofi.rasi"
+
+				# Oh-my-posh.
+				archivo_tmp="$AUTO/plantilla.omp.json"
+				archivo_omp="$AUTO/terminal.omp.json"
+				sed "s/WindowsUserName/$windows_user_name/g" "$AUTO/plantilla_de_omp.json" > "$archivo_tmp"
+				sed -i "s/PreferredUserName/$preferred_user_name/g" "$archivo_tmp"
+				reemplazar_con_variables_globales "$archivo_tmp" "$archivo_omp"
+				rm -f "$archivo_tmp"
 			;;
 
 			reiniciar-selector)
