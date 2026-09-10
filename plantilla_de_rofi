@@ -1,0 +1,98 @@
+/* }@theme "/usr/share/rofi/themes/iggy.rasi" */
+
+configuration {
+	modes: "combi,filebrowser";
+	combi-modes: "drun,ssh,window";
+	show-icons: true;
+	combi-display-format: "{icon} {text}";
+	fixed-num-lines: false;
+	run-shell-command: '{terminal} -e bash -ic "{cmd} && read"';
+	disable-history: false;
+	icon-theme: "Papirus";
+	terminal: "kitty";
+    display-window: "";
+    display-combi: "";
+    display-filebrowser: "";
+    font: "sans 10";
+    window-thumbnail: true;
+    window-format: "{t}";
+}
+
+window {
+    border: 4px;
+    border-radius: 10px;
+    padding: 4px;
+    border-color: #000000;
+    background-color: #000000;
+}
+
+mainbox {
+    border-radius: 6px;
+	background-image: url("$AUTO/imagenes/Júpiter.jpg", width);
+}
+
+inputbar {
+    border-color: #000000;
+    background-color: #000000;
+    children: [ prompt, entry ];
+}
+
+entry {
+    placeholder: "Arch Linux";
+    text-color: #ffffff;
+    horizontal-align: 0.5;
+    font: "sans 30";
+}
+    
+prompt {
+    text-color: #ffffff;
+    background-color: #000000;
+}
+
+listview {
+    layout: vertical;
+    lines: 4;
+    columns: 5;
+    fixed-height: true;
+    spacing: 10px;
+    flow: horizontal;
+}
+    
+element {
+    orientation: vertical;
+    /* padding: 3px 7px 3px 7px; */
+    border-radius: 10px;
+}
+
+element-icon {
+    size: 75px;
+}
+
+element-text {
+    horizontal-align: 0.5;
+    vertical-align: 0.5;
+}
+
+element normal normal, element alternate normal {
+    background-color: #00000000;
+    text-color: #ffffff;
+}
+
+element normal active, element alternate active {
+    background-color: #c1d53ebb;
+    text-color: #ffffff;
+}
+
+element normal urgent, element alternate urgent, element selected urgent {
+    background-color: #ff000060;
+    text-color: #ffffff;
+}
+
+element selected normal {
+    background-color: #ffffffbb;
+    text-color: #11111b;
+}
+element selected active {
+    background-color: #ffffffee;
+    text-color: #11111b;
+}

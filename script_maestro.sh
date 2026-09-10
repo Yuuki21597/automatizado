@@ -30,6 +30,7 @@ case $1 in
 			'qtile'|'qtile-dev')
 				startx "$HOME/.xinitrc" "$2" "$@"
 			;;
+
 			*)
 				mensaje="Entorno de escritorio desconocido: $2"
 				echo "$mensaje"
@@ -48,6 +49,7 @@ case $1 in
 				sleep 2
 				pactl set-sink-volume @DEFAULT_SINK@ 67%
 			;;
+
 			limpiar-actualización)
 				gestor="yay"
 
@@ -77,6 +79,10 @@ case $1 in
 				else
 					echo "No hay paquetes por eliminar instalados."
 				fi
+			;;
+			
+			generar-configuracion)
+				envsubst < "$3" > "$4"
 			;;
 		esac
 	;;
