@@ -323,6 +323,12 @@ keys: list[Key] = [
 	),
 	Key(
 		['mod4'],
+		'Space',
+		lazy.spawn(f'{SCRIPT} metodo_de_entrada'),
+		desc = 'Cambia el método de entrada.'
+	),
+	Key(
+		['mod4'],
 		'Return',
 		lazy.spawn('rofi -show combi'),
 		desc = 'Lanzador de aplicaciones.'

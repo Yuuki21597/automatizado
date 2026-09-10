@@ -93,6 +93,34 @@ case $1 in
 		esac
 	;;
 # ------------------------------------------------------------------------------
+# Seccion 3: Método de entrada y distribución del teclado.
+	'metodo_de_entrada')
+		motores=(
+			"keyboard-latam-deadtilde"	# Español latino
+			"mozc"						# Japonés
+		)
+
+		# Motor actual
+		actual=$(fcitx5-remote -n)
+
+		# Encuentra el índice actual
+		indice=-1
+		for i in "${!motores[@]}"; do
+			if [[ "${motores[$i]}" == "$actual" ]]; then
+				indice=$i
+				break
+			fi
+		done
+
+		# Calcula el siguiente índice (con ciclo)
+		indice_siguiente=$(( (indice + 1) % ${#motores[@]} ))
+
+		# Establece el siguiente engine
+		motor_siguiente="${motores[$indice_siguiente]}"
+
+		fcitx5-remote -s "$motor_siguiente"
+	;;
+# ------------------------------------------------------------------------------
 # Fallback para errores.
 	*)
 		echo "Primer argumento desconocido."
