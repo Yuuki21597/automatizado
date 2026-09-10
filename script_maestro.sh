@@ -84,6 +84,12 @@ case $1 in
 			generar-configuracion)
 				envsubst < "$3" > "$4"
 			;;
+
+			reiniciar-selector)
+				dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP
+				killall -9 xdg-desktop-portal xdg-desktop-portal-gtk 2>/dev/null
+				/usr/lib/xdg-desktop-portal &
+			;;
 		esac
 	;;
 # ------------------------------------------------------------------------------

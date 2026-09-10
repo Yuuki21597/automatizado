@@ -440,10 +440,12 @@ def inicio_único() -> None:
 	subproceso(RESOLUCIÓN.split())
 
 	inicio_asíncrono: list[list[str]] = [
-		[f'{SCRIPT}', 'consola', 'reiniciar-audio']
+		[SCRIPT, 'consola', 'reiniciar-audio']
 	]
 
-	inicio_síncrono: list[list[str]] = []
+	inicio_síncrono: list[list[str]] = [
+		[SCRIPT, 'consola', 'reiniciar-selector']
+	]
 
 	for comando in inicio_asíncrono:
 		asíncrono(comando)
