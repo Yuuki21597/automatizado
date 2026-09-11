@@ -5,8 +5,8 @@ from cairocffi import pixbuf, Context
 from libqtile.log_utils import logger
 from cairocffi.xcb import XCBSurface
 from libqtile.backend.x11.core import Core as X11Core
+from libqtile.backend.base.window import Window as WindowBase
 from libqtile.layout.ratiotile import RatioTile as RTBase
-from libqtile.backend.base.window import Window
 from typing import Any
 from os import listdir, path as os_ruta, getenv
 
@@ -20,6 +20,8 @@ from libqtile.layout.base import Layout as qtileLayout
 from libqtile import layout, qtile as Core, bar, widget, resources, hook
 from libqtile.utils import guess_terminal
 from libqtile.config import Group, Drag, Click, Key, Screen, Match
+from libqtile.group import _Group as Grupo
+from types import NoneType
 from libqtile.lazy import lazy
 from random import choice
 from subprocess import run as subproceso, Popen as asíncrono
@@ -108,8 +110,15 @@ def _implementacion_de_painter(self) -> NewPainter:
 X11Core.painter = property(_implementacion_de_painter)
 
 
+class Window(WindowBase):
+	def __init__(self) -> None:
+		self._wm_class: str = ''
+		super().__init__()
+		self.recuperar_fullscreen: bool = False
+
+
 class RatioTile(RTBase):
-	def add_client(self, w: Window) -> None:
+	def add_client(self, w: WindowBase) -> None:
 		self.dirty = True
 		self.clients.append(w)
 
@@ -193,12 +202,18 @@ def notificación(mensaje: str, icono: str = ÍCONO, título: str = 'Qtile', des
 
 TAMAÑO_DE_LOS_ÍCONOS: int = 18
 ALTURA_DE_LA_BARRA: int = TAMAÑO_DE_LOS_ÍCONOS + (2 * 2)
+MOSTRAR_BARRAS: list[bool] = [True for x in range(len(MONITORES))]
 
 ÁREAS: list[str] = [
 	'Principal',
 	'Secundario',
 	'Juegos'
 ]
+
+MINIMIZADO: list[bool] = [False for área in ÁREAS]
+PANTALLA_COMPLETA: list[Window | None] = [None for área in ÁREAS]
+COMPORTAMIENTO_DE_ALT_TAB: str = 'Default'
+ROTAR_ALT_TAB_EN_EL_GRUPO: bool = False
 
 MARGEN_GENERAL: int = 3
 
@@ -232,10 +247,29 @@ AFINIDAD: dict[str, int] = {
 	ÁREAS[1]: 1,
 }
 
+GROSOR_DEL_BORDE: int = 3
+COLOR_DEL_BORDE: str = COLORES['verde']
+
+LISTADO_DE_VENTANAS_ESPECIALES: list[dict[str, Any]] = []
+
+VENTANAS_ESPECIALES: list[dict[str, Any]] = [
+	{
+		'titulo': ventana.get('titulo'),
+		'match': ventana.get('match', {'title': ventana.get('titulo')}),
+		'área': ventana.get('área', None),
+		'tipo_de_ventana': ventana.get('tipo_de_ventana', 'Normal'),
+		'saltar_alt_tab': ventana.get('saltar_alt_tab', False),
+		'color_del_borde': ventana.get('color_del_borde', COLOR_DEL_BORDE),
+		'grosor_del_borde': ventana.get('grosor_del_borde', GROSOR_DEL_BORDE),
+		'tipo_de_cierre': ventana.get('tipo_de_cierre', 'Normal'),
+		'tipo_de_pantalla_completa': ventana.get('tipo_de_pantalla_completa', 'Normal')
+	} for ventana in LISTADO_DE_VENTANAS_ESPECIALES
+]
+
 ESPECIFICACIONES: dict[str, int | str] = {
 	'margin': MARGEN_GENERAL * 2,
-	'border_focus': COLORES['verde'],
-	'border_width': 3
+	'border_focus': COLOR_DEL_BORDE,
+	'border_width': GROSOR_DEL_BORDE
 }
 
 LISTADO_DE_LAYOUTS: list[qtileLayout] = [
@@ -272,6 +306,210 @@ groups: list[Group] = [
 		screen_affinity = AFINIDAD.get(nombre, 0)
 	) for nombre in ÁREAS
 ]
+
+# ------------------------------------------------------------------------------
+# Listas de ventanas.
+
+ventanas_de_cierre_forzado: list[str]; ventanas_de_cierre_especial: list[str]; ventanas_que_no_se_cierran: list[str]; ventanas_flotantes: list[str]; ventanas_estáticas: list[str]; ventanas_sin_foco: list[str];ventanas_con_pantalla_completa_especial: list[str]; ventanas_sin_pantalla_completa: list[str]
+ventanas_de_cierre_forzado, ventanas_de_cierre_especial, ventanas_que_no_se_cierran, ventanas_flotantes, ventanas_estáticas, ventanas_sin_foco,ventanas_con_pantalla_completa_especial, ventanas_sin_pantalla_completa = [], [], [], [], [], [], [], []
+
+for ventana in VENTANAS_ESPECIALES:
+	titulo: str | None = ventana.get('titulo')
+
+	if titulo is None:
+		continue
+
+	tipo_de_ventana: str | None = ventana.get('tipo_de_ventana')
+	if tipo_de_ventana == 'Flotante':
+		ventanas_flotantes.append(titulo)
+	elif tipo_de_ventana == 'Estática':
+		ventanas_estáticas.append(titulo)
+
+	if ventana.get('saltar_alt_tab'):
+		ventanas_sin_foco.append(titulo)
+
+	tipo_de_cierre: str | None = ventana.get('tipo_de_cierre')
+	if tipo_de_cierre == 'Forzado':
+		ventanas_de_cierre_forzado.append(titulo)
+	elif tipo_de_cierre == 'Especial':
+		ventanas_de_cierre_especial.append(titulo)
+	elif not tipo_de_cierre:
+		ventanas_que_no_se_cierran.append(titulo)
+
+	tipo_de_pantalla_completa: str | None = ventana.get('tipo_de_pantalla_completa')
+	if tipo_de_pantalla_completa == 'Especial':
+		ventanas_con_pantalla_completa_especial.append(titulo)
+	elif not tipo_de_pantalla_completa:
+		ventanas_sin_pantalla_completa.append(titulo)
+
+# ------------------------------------------------------------------------------
+# Control de ventanas.
+
+def listado_de_ventanas(gestor: Core, un_solo_grupo: bool = False, grupo: Group | Grupo | None = None, excluir_flotantes: bool = False, excluir_minimizados: bool = False) -> list[Window]:
+	listado: list[Window] = []
+	ventanas: list[Window] = []
+
+	grupos: list[Group | Grupo] = [gestor.current_screen.group if grupo is None else grupo] if un_solo_grupo else gestor.groups
+
+	for grupo in grupos:
+		listado.extend(grupo.windows)
+
+	for app in listado:
+		if (app.name in ventanas_sin_foco) or (app.minimized and excluir_minimizados) or (app.floating and not app.fullscreen and excluir_flotantes):
+			continue
+		else:
+			ventanas.append(app)
+
+	return ventanas
+
+def control_de_pantalla_completa(ventana: Window, grupo: Group | Grupo) -> None:
+	if not ventana or not ventana.fullscreen: return
+
+	if isinstance(ventana.group, NoneType): raise TypeError('¡El grupo es None!')
+
+	ventanas: list[Window] = listado_de_ventanas(gestor = ventana.group.qtile, un_solo_grupo = True, grupo = ventana.group, excluir_flotantes = True, excluir_minimizados = True)
+
+	if (ventana.group.name == grupo.name) and len(ventanas) > 1:
+		ventana.recuperar_fullscreen = True
+		pantalla_completa(ventana.group.qtile, ventana)
+
+def actualizar_barras() -> None:
+	global MOSTRAR_BARRAS
+
+	gestor: Core = Core
+	
+	pantalla: Screen = gestor.current_screen
+	indice: int = pantalla.index
+
+	MOSTRAR_BARRAS[indice] = not MOSTRAR_BARRAS[indice]
+
+	for position in ['top', 'bottom', 'left', 'right']:
+		barra: bar.Bar = getattr(pantalla, position)
+		if barra:
+			barra.show(MOSTRAR_BARRAS[indice])
+
+def minimizar_grupo(gestor: Core, grupo: Group | None = None, excepciones: list[Window | None] | Window | None = None) -> None:
+	global MINIMIZADO
+
+	if gestor is None: return
+
+	if isinstance(excepciones, (NoneType, WindowBase)):
+		excepciones = [excepciones]
+
+	grupo = grupo if grupo is not None else gestor.current_group
+	indice: int = gestor.groups.index(grupo)
+	ventanas: list[Window] = listado_de_ventanas(gestor = gestor, un_solo_grupo = True, grupo = grupo)
+
+	minimizado: bool = MINIMIZADO[indice]
+
+	for ventana in ventanas:
+		if (not minimizado and ventana.minimized) or (minimizado and not ventana.minimized and ventana not in excepciones) or (minimizado is False and ventana in excepciones):
+				continue
+		
+		ventana.toggle_minimize()
+
+		if ventana in excepciones and ventana.minimized:
+			ventana.toggle_minimize()
+
+	MINIMIZADO[indice] = not minimizado
+
+def pantalla_completa(gestor: Core, ventana: Window | None = None) -> None:
+	global MOSTRAR_BARRAS, MINIMIZADO, PANTALLA_COMPLETA
+
+	if not gestor:
+		return
+	
+	ventana = gestor.current_window if ventana is None else ventana
+
+	if not ventana or (ventana.name in ventanas_sin_pantalla_completa):
+		if not MOSTRAR_BARRAS[gestor.current_screen.index]:
+			actualizar_barras()
+		return
+	
+	if (ventana.name in ventanas_con_pantalla_completa_especial) or ('nomacs' in ventana._wm_class):
+		minimizar_grupo(gestor, excepciones = ventana)
+		actualizar_barras()
+
+		if MINIMIZADO[gestor.grupos.index(ventana.group)]: PANTALLA_COMPLETA[gestor.groups.index(ventana.group)] = ventana
+		return
+	
+	if not MOSTRAR_BARRAS[gestor.current_screen.index]:
+		actualizar_barras()
+	
+	if ventana.floating and not ventana.fullscreen:
+		ventana.toggle_floating()
+
+	ventana.toggle_fullscreen()
+
+	if ventana.fullscreen: PANTALLA_COMPLETA[gestor.groups.index(ventana.group)] = ventana
+
+def enfocar_grupo(gestor: Core, grupo: Group | Grupo) -> None:
+	global COMPORTAMIENTO_DE_ALT_TAB
+
+	pantalla_seleccionada: int | None = None
+
+	if hay_mas_de_una_pantalla():
+		if COMPORTAMIENTO_DE_ALT_TAB == 'Pantalla estática':
+
+			for pantalla in gestor.screens:
+				if pantalla.group.name == grupo.name:
+					pantalla_seleccionada = pantalla.index
+					break
+
+		if pantalla_seleccionada is None or COMPORTAMIENTO_DE_ALT_TAB == 'Afinidad de pantalla':
+			pantalla_seleccionada = grupo.screen_affinity
+
+		if COMPORTAMIENTO_DE_ALT_TAB == 'Default':
+			pantalla_seleccionada = gestor.current_screen.index
+
+		gestor.focus_screen(pantalla_seleccionada, False)
+
+	try:
+		grupo.toscreen(pantalla_seleccionada)
+	except AttributeError:
+		gestor.groups_map[grupo.name].toscreen(pantalla_seleccionada)
+	except Exception as error:
+		notificación(f'Error: {error}')
+
+def alt_tab(gestor: Core, tipo: str | None = None) -> None:
+	global ROTAR_ALT_TAB_EN_EL_GRUPO, PANTALLA_COMPLETA
+	ventanas: list[Window] = listado_de_ventanas(gestor = gestor, un_solo_grupo = ROTAR_ALT_TAB_EN_EL_GRUPO, excluir_minimizados = True)
+
+	if not ventanas:
+		notificación('No se encontraron ventanas.')
+		return
+
+	indice_ventana_actual: int = 0
+	try:
+		indice_ventana_actual = ventanas.index(gestor.current_window)
+	except ValueError:
+		indice_ventana_actual = 0 if tipo == 'Anterior' else -1
+	except Exception as error:
+		notificación(f'Error: {error}')
+
+	indice: int
+	if tipo == 'Siguiente':
+		indice = (indice_ventana_actual + 1) % len(ventanas)
+	elif tipo == 'Anterior':
+		indice = (indice_ventana_actual - 1) % len(ventanas)
+	else:
+		indice = 0
+
+	ventana: Window = ventanas[indice]
+	if isinstance(ventana.group, NoneType): raise TypeError('¡El grupo es None!')
+	grupo_de_ventana: Grupo = ventana.group
+
+	control_de_pantalla_completa(gestor.current_window, grupo_de_ventana)
+
+	if gestor.current_group != grupo_de_ventana:
+		gestor.current_group.current_window = None
+		enfocar_grupo(gestor, grupo_de_ventana)
+		última_pantalla_completa: Window | None = PANTALLA_COMPLETA[gestor.groups.index(grupo_de_ventana)]
+		if última_pantalla_completa is not None and (ventana != última_pantalla_completa):
+			control_de_pantalla_completa(última_pantalla_completa, grupo_de_ventana)
+			PANTALLA_COMPLETA[gestor.groups.index(grupo_de_ventana)] = None
+
+	grupo_de_ventana.focus(ventanas[indice], False)
 
 # ------------------------------------------------------------------------------
 # Atajos de teclado.
@@ -316,6 +554,18 @@ keys: list[Key] = [
 	# --------------------------------------------------------------------------
 	# Atajos con Alt.
 	
+	Key(
+		['mod1'],
+		'Tab',
+		lazy.function(alt_tab, tipo = 'Siguiente'),
+		desc = 'Mueve el foco a la siguiente ventana.'
+	),
+	Key(
+		['mod1', 'Shift'],
+		'Tab',
+		lazy.function(alt_tab, tipo = 'Anterior'),
+		desc = 'Mueve el foco a la ventana anterior.'
+	),
 	Key(
 		['mod1'],
 		'F4',
