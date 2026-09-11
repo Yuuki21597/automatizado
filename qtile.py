@@ -9,6 +9,13 @@ from libqtile.layout.ratiotile import RatioTile as RTBase
 from libqtile.backend.base.window import Window
 from typing import Any
 from os import listdir, path as os_ruta, getenv
+
+import sys
+lib = f'{getenv('REPO', '')}/librerias'
+sys.path.append(lib)
+
+from lib_recursos_nativos import notificación as nt
+
 from libqtile.layout.base import Layout as qtileLayout
 from libqtile import layout, qtile as Core, bar, widget, resources, hook
 from libqtile.utils import guess_terminal
@@ -172,7 +179,17 @@ CLICK_IZQUIERDO: str = 'Button1'
 CLICK_CENTRAL: str = 'Button2'
 CLICK_DERECHO: str = 'Button3'
 
+AUTO: str = getenv('AUTO', '')
 SCRIPT: str = getenv('SM', '')
+ÍCONO: str = f'{AUTO}/imagenes/icono-qtile.png'
+
+# ------------------------------------------------------------------------------
+# Notificaciones.
+
+def notificación(mensaje: str, icono: str = ÍCONO, título: str = 'Qtile', desktop_entry = '') -> None:
+	nt(mensaje, icono, título, 'normal', desktop_entry)
+
+# ------------------------------------------------------------------------------
 
 TAMAÑO_DE_LOS_ÍCONOS: int = 18
 ALTURA_DE_LA_BARRA: int = TAMAÑO_DE_LOS_ÍCONOS + (2 * 2)
@@ -320,6 +337,12 @@ keys: list[Key] = [
 		'r',
 		lazy.spawn(TERMINAL),
 		desc = 'Abre el terminal.'
+	),
+	Key(
+		['mod4'],
+		'v',
+		lazy.spawn('copyq menu'),
+		desc = 'Abre el historial del portapapeles.',
 	),
 	Key(
 		['mod4'],
