@@ -810,6 +810,56 @@ def seleccionar_fondo() -> str | None:
 # ------------------------------------------------------------------------------
 # Barras y pantallas.
 
+def cambiar_estado_alt_tab(primera_vez = False) -> None:
+	global ROTAR_ALT_TAB_EN_EL_GRUPO
+
+	gestor: Core = Core
+
+	if not primera_vez:
+		ROTAR_ALT_TAB_EN_EL_GRUPO = not ROTAR_ALT_TAB_EN_EL_GRUPO
+
+	for pantalla in gestor.screens:
+		actualizar_widget(gestor, pantalla.index, 'Tipo de Alt + Tab', COLORES['blanco'], COLORES['verde'], ROTAR_ALT_TAB_EN_EL_GRUPO)
+
+	mensaje: str = 'Alt + Tab global.' if not ROTAR_ALT_TAB_EN_EL_GRUPO else 'Alt + Tab por grupo.'
+	notificación(mensaje)
+
+def cambiar_manejo_de_capturas(primera_vez = False) -> None:
+	global GUARDADO_DE_CAPTURAS
+
+	gestor: Core = Core
+
+	if not primera_vez:
+		GUARDADO_DE_CAPTURAS = not GUARDADO_DE_CAPTURAS
+
+	for pantalla in gestor.screens:
+		actualizar_widget(gestor, pantalla.index, 'Capturas de pantalla', COLORES['negro'], COLORES['blanco'], GUARDADO_DE_CAPTURAS)
+
+	mensaje = 'Capturas guardadas en el portapapeles.' if not GUARDADO_DE_CAPTURAS else 'Capturas guardadas en un archivo.'
+	notificación(mensaje)
+
+def actualizar_widget(gestor: Core, pantalla: int, nombre: str, color_1: str, color_2: str, interruptor: bool) -> None:
+	listado: list[Any] = gestor.screens[pantalla].top.widgets
+
+	w_ind: int = 0
+	widget: Any = None
+
+	for indice, elemento in enumerate(listado):
+		if elemento.name == nombre:
+			w_ind = indice
+			widget = elemento
+
+	widget_previo: Any = listado[w_ind - 1]
+	widget_siguiente: Any = listado[w_ind + 1]
+
+	widget.background = color_1 if interruptor else color_2
+	widget.set_font(None, 0, "", color_2 if interruptor else color_1, None)
+	widget_siguiente.background = color_1 if interruptor else color_2
+
+	widget_previo.draw()
+	widget.draw()
+	widget_siguiente.draw()
+
 def barra(tipo: str, pantalla: int) -> list[Any]:
 	listado: list[Any] = []
 	widgets: list[Any] = []
@@ -874,12 +924,18 @@ def barra(tipo: str, pantalla: int) -> list[Any]:
 				qe_wid.TextBox(
 					background = COLORES['blanco'],
 					foreground = COLORES['negro'],
+					mouse_callbacks = {
+						CLICK_IZQUIERDO: cambiar_manejo_de_capturas
+					},
 					name = 'Capturas de pantalla',
 					text = '📷'
 				),
 				qe_wid.TextBox(
 					background = COLORES['verde'],
 					foreground = COLORES['blanco'],
+					mouse_callbacks = {
+						CLICK_IZQUIERDO: cambiar_estado_alt_tab
+					},
 					name = 'Tipo de Alt + Tab',
 					text = '🔄'
 				),
@@ -1025,6 +1081,12 @@ def inicio_único() -> None:
 
 	for comando in inicio_síncrono:
 		subproceso(comando)
+
+@hook.subscribe.startup
+def inicio_recurrente() -> None:
+	cambiar_manejo_de_capturas(primera_vez = True)
+	cambiar_estado_alt_tab(primera_vez = True)
+	notificación('Configuración lista.')
 
 @hook.subscribe.client_focus
 def ventana_enfocada(ventana: Window):
