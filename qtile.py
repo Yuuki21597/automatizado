@@ -16,14 +16,17 @@ sys.path.append(lib)
 
 from lib_recursos_nativos import notificación as nt, pipas
 
+from qtile_extras.layout.decorations.borders import ConditionalBorder, ConditionalBorderWidth
 from libqtile.layout.base import Layout as qtileLayout
-from libqtile import layout, qtile as Core, bar, widget, resources, hook
+from libqtile import layout, qtile as Core, bar, resources, hook
 from libqtile.utils import guess_terminal
 from libqtile.config import Group, Drag, Click, Key, Screen, Match
 from libqtile.group import _Group as Grupo
 from types import NoneType
 from libqtile.lazy import lazy
 from random import choice
+from qtile_extras import widget as qe_wid
+from qtile_extras.widget.decorations import RectDecoration, PowerLineDecoration
 from subprocess import run as subproceso, Popen as asíncrono
 
 
@@ -188,7 +191,9 @@ CLICK_IZQUIERDO: str = 'Button1'
 CLICK_CENTRAL: str = 'Button2'
 CLICK_DERECHO: str = 'Button3'
 
+NOMBRE_EQUIPO: str = getenv('NOMBRE_EQUIPO', '')
 HOME: str = getenv('HOME', '')
+REPO: str = getenv('REPO', '')
 AUTO: str = getenv('AUTO', '')
 IMÁGENES: str = f'{HOME}/Imágenes'
 SCRIPT: str = getenv('SM', '')
@@ -210,6 +215,7 @@ COMANDOS_MAIM: dict[str, str] = {
 	'ventana': f'maim -i WID',
 }
 
+TEMA_DE_ICONOS: str = '/usr/share/icons/Papirus-Dark'
 TAMAÑO_DE_LOS_ÍCONOS: int = 18
 ALTURA_DE_LA_BARRA: int = TAMAÑO_DE_LOS_ÍCONOS + (2 * 2)
 MOSTRAR_BARRAS: list[bool] = [True for x in range(len(MONITORES))]
@@ -228,6 +234,7 @@ ROTAR_ALT_TAB_EN_EL_GRUPO: bool = False
 GUARDADO_DE_CAPTURAS: bool = False
 
 MARGEN_GENERAL: int = 3
+ESPACIADOR: int = 5
 
 CARPETAS_DE_FONDOS: list[Any] = []
 FONDOS_DE_PANTALLA: list[str] = [
@@ -278,10 +285,30 @@ VENTANAS_ESPECIALES: list[dict[str, Any]] = [
 	} for ventana in LISTADO_DE_VENTANAS_ESPECIALES
 ]
 
-ESPECIFICACIONES: dict[str, int | str] = {
+COLOR_CONDICIONAL_DEL_BORDE: ConditionalBorder = ConditionalBorder(
+	fallback = COLOR_DEL_BORDE,
+	matches = [
+		(
+			Match(**ventana['match']),
+			ventana['color_del_borde']
+		) for ventana in VENTANAS_ESPECIALES
+	]
+)
+
+GROSOR_CONDICIONAL_DEL_BORDE: ConditionalBorderWidth = ConditionalBorderWidth(
+	default = GROSOR_DEL_BORDE,
+	matches = [
+		(
+			Match(**ventana['match']),
+			ventana['grosor_del_borde']
+		) for ventana in VENTANAS_ESPECIALES
+	]
+)
+
+ESPECIFICACIONES: dict[str, int | ConditionalBorder | ConditionalBorderWidth] = {
 	'margin': MARGEN_GENERAL * 2,
-	'border_focus': COLOR_DEL_BORDE,
-	'border_width': GROSOR_DEL_BORDE
+	'border_focus': COLOR_CONDICIONAL_DEL_BORDE,
+	'border_width': GROSOR_CONDICIONAL_DEL_BORDE
 }
 
 LISTADO_DE_LAYOUTS: list[qtileLayout] = [
@@ -311,9 +338,16 @@ LAYOUTS_POR_ÁREAS: dict[str, list[qtileLayout]] = {
 	]
 }
 
+GESTIÓN_DE_VENTANAS: dict[str, list[Match]] = {
+	área: [
+		Match(**ventana['match']) for ventana in VENTANAS_ESPECIALES if ventana.get('área') == área
+	] for área in ÁREAS
+}
+
 groups: list[Group] = [
 	Group(
 		name = nombre,
+		matches = GESTIÓN_DE_VENTANAS.get(nombre),
 		layouts = LAYOUTS_POR_ÁREAS.get(nombre, layouts),
 		screen_affinity = AFINIDAD.get(nombre, 0)
 	) for nombre in ÁREAS
@@ -447,6 +481,12 @@ def minimizar_grupo(gestor: Core, grupo: Group | None = None, excepciones: list[
 			ventana.toggle_minimize()
 
 	MINIMIZADO[indice] = not minimizado
+
+def minimizar_todo(gestor: Core, excepciones: list[Window | None] | Window | None = None) -> None:
+	if gestor is None: return
+
+	for pantalla in gestor.screens:
+		minimizar_grupo(gestor, pantalla.group, excepciones)
 
 def pantalla_completa(gestor: Core, ventana: Window | None = None) -> None:
 	global MOSTRAR_BARRAS, MINIMIZADO, PANTALLA_COMPLETA
@@ -767,21 +807,196 @@ def seleccionar_fondo() -> str | None:
 	
 		return fondo
 
-WIDGETS: list[Any] = [
-	widget.CurrentLayout(),
-	widget.GroupBox(),
-	widget.WindowName(),
-	widget.TextBox('personal config', name='default'),
-	widget.TextBox('Presiona &lt;M-r&gt; para usar Rofi', foreground = '#d75f5f'),
-	widget.Systray(),
-	widget.Clock(format = '%Y-%m-%d %a %I:%M %p'),
-	widget.QuickExit()
-]
+# ------------------------------------------------------------------------------
+# Barras y pantallas.
+
+def barra(tipo: str, pantalla: int) -> list[Any]:
+	listado: list[Any] = []
+	widgets: list[Any] = []
+
+	if tipo == 'Principal':
+		listado.extend(
+			[
+				qe_wid.GroupBox(
+					active = COLORES['blanco'],
+					borderwidth = 2,
+					disable_drag = True,
+					highlight_method = 'block',
+					inactive = COLORES['gris_claro'],
+					margin = MARGEN_GENERAL,
+					name = 'Indicador de grupos',
+					this_current_screen_border = COLORES['azul'],
+					decorations = [
+						RectDecoration(
+							padding = -1,
+							colour = COLORES['blanco'],
+							filled = True,
+						),
+						RectDecoration(
+							colour = COLORES['negro'],
+							radius = 5,
+							filled = True,
+							padding_y = 5
+						)
+					]
+				),
+				qe_wid.TaskList(
+					border = COLORES['verde'],
+					borderwidth = 0,
+					foreground = COLORES['blanco'],
+					highlight_method = 'block',
+					icon_size = TAMAÑO_DE_LOS_ÍCONOS,
+					margin_x = 0,
+					margin_y = 4,
+					name = 'Barra de tareas',
+					padding_x = 3,
+					padding_y = 2,
+					spacing = ESPACIADOR,
+					theme_mode = 'preferred',
+					theme_path = TEMA_DE_ICONOS,
+					txt_minimized = '',
+					txt_maximized = '',
+					txt_floating = '🗗',
+					urgent_border = COLORES['rojo'],
+				),
+				qe_wid.CurrentLayout(
+					background = COLORES['naranja'],
+					foreground = COLORES['negro'],
+					icon_first = True,
+					mode = 'both',
+					mouse_callbacks = {
+						CLICK_IZQUIERDO: lazy.next_layout(),
+						CLICK_DERECHO: lazy.prev_layout(),
+					},
+					scale = 0.7,
+					padding = 7,
+				),
+				qe_wid.TextBox(
+					background = COLORES['blanco'],
+					foreground = COLORES['negro'],
+					name = 'Capturas de pantalla',
+					text = '📷'
+				),
+				qe_wid.TextBox(
+					background = COLORES['verde'],
+					foreground = COLORES['blanco'],
+					name = 'Tipo de Alt + Tab',
+					text = '🔄'
+				),
+				qe_wid.TextBox(
+					background = COLORES['amarillo'],
+					foreground = COLORES['negro'],
+					mouse_callbacks = {
+						CLICK_IZQUIERDO: lazy.window.bring_to_front(),
+						CLICK_CENTRAL: lazy.function(minimizar_todo),
+						CLICK_DERECHO: lazy.function(minimizar_grupo),
+					},
+					text = '🗗'
+				)
+			]
+		)
+
+		if NOMBRE_EQUIPO == 'Yuusha #03':
+			listado.extend(
+				[
+					qe_wid.BatteryIcon(
+						background = COLORES['morado'],
+						update = 2,
+						theme_path = f'{REPO}/pale-battery-icons_for_qtile',
+					),
+					qe_wid.Battery(
+						name = 'Batería',
+						background = COLORES['morado'],
+						format = '{percent:2.0%}'
+					)
+				]
+			)
+
+		if pantalla == 0:
+			listado.extend(
+				[
+					qe_wid.Systray(
+						background = COLORES['azul'],
+						icon_size = TAMAÑO_DE_LOS_ÍCONOS,
+						padding = 4
+					)
+				]
+			)
+
+		widget_margen = qe_wid.Spacer(
+				background = COLORES['transparente'],
+				length = MARGEN_GENERAL * 2
+			)
+		for indice, elemento in enumerate(listado):
+			if indice == 0:
+				widgets.append(widget_margen)
+
+			if elemento.name == 'Indicador de grupos':
+				widget_1 = qe_wid.Spacer(
+					background = COLORES['transparente'] if indice == 0 else listado[indice - 1].background,
+					length = 1,
+					decorations = [
+						PowerLineDecoration(
+							size = 7 if indice == 0 else 15,
+							override_next_colour = COLORES['blanco'],
+							path = 'rounded_right' if indice == 0 else 'arrow_right'
+						)
+					]
+				)
+
+				widget_2 = qe_wid.Spacer(
+					background = COLORES['transparente'],
+					length = 1,
+					decorations = [
+						PowerLineDecoration(
+							size = 7 if indice + 1 == len(listado) else 15,
+							override_colour = COLORES['blanco'],
+							path = 'rounded_left' if indice + 1 == len(listado) else 'arrow_left'
+						)
+					]
+				)
+
+				widgets.append(widget_1)
+				widgets.append(elemento)
+				widgets.append(widget_2)
+			else:
+				if elemento.name not in ('Barra de tareas', 'Batería'):
+					w_esp = qe_wid.Spacer(
+						background = listado[indice - 1].background,
+						length = ESPACIADOR,
+						decorations = [
+							PowerLineDecoration(
+								path = 'arrow_right',
+							)
+						]
+					)
+					widgets.append(w_esp)
+				
+				widgets.append(elemento)
+
+
+			if indice + 1 == len(listado):
+				if elemento.name not in ('Indicador de grupos', 'Batería'):
+					widget_redondo = qe_wid.Spacer(
+						background = elemento.background,
+						length = ESPACIADOR,
+						decorations = [
+							PowerLineDecoration(
+								size = 7,
+								path = 'rounded_left'
+							),
+						]
+					)
+					widgets.append(widget_redondo)
+
+				widgets.append(widget_margen)
+
+	return widgets
 
 screens: list[Screen] = [
 	Screen(
 		top = bar.Bar(
-			WIDGETS,
+			barra('Principal', indice),
 			background = COLORES['transparente'],
 			size = ALTURA_DE_LA_BARRA
 		),
