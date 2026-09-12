@@ -26,6 +26,117 @@ reemplazar_con_variables_globales() {
 	envsubst < "$1" > "$2"
 }
 
+listado_de_unidades() {
+	ignorar_etiquetas=(
+		"UEFI"
+		"VTOYEFI"
+	)
+
+	ignorar_uuid=(
+		"EE3C-A774"                                 # UEFI
+		"6b08f856-edab-4e47-916a-0f5ffff24c44"      # Yuusha #01
+		"F331-EB4E"									# VTOYEFI
+	)
+
+	ignorar_unidades=()
+
+	no_desmontar=(
+		"/boot/efi"
+		"/"
+	)
+
+	unidades_conectadas=$(lsblk -n -P -o NAME,TYPE,LABEL | sort -t'"' -k6 | awk -F '"' '$4 == "part" {print $2}')
+}
+
+montar() {
+	local etiqueta=$1
+
+	local unidad=$(lsblk -n -P -o LABEL,NAME | grep "LABEL=\"$etiqueta\"" | awk -F '"' '{print $4}')
+
+	if [[ -z "$unidad" ]]; then
+		notificación "No se encontró $etiqueta." "/usr/share/icons/Papirus/128x128/apps/xfce4-fsguard-plugin-warning.svg"
+		exit 1
+	fi
+
+	montaje "$unidad"
+}
+
+desmontaje() {
+	local unidad=$1
+
+	local etiqueta=$(lsblk -rno NAME,LABEL | awk -v u="$unidad" '$1==u {print $2}' | sed 's/\\x20/ /g')
+
+	if [[ -z "$etiqueta" ]]; then
+        notificación "No se encontró $unidad." "/usr/share/icons/Papirus/128x128/apps/xfce4-fsguard-plugin-warning.svg"
+        return
+    fi
+
+	desmontar "$etiqueta"
+}
+
+desmontar() {
+	local etiqueta=$1
+	local etiqueta_escapada="${etiqueta/ /\\\\x20}"
+	local punto_de_montaje=$(lsblk -rno LABEL,MOUNTPOINT | awk -v e="$etiqueta_escapada" '$1==e {print $2}')
+	local punto_de_montaje="${punto_de_montaje/\\x20/ }"
+
+	if [[ -z "$punto_de_montaje" ]]; then
+        notificación "$etiqueta no está montado." "/usr/share/icons/Papirus/128x128/apps/xfce4-fsguard-plugin-warning.svg"
+        return
+    fi
+
+	if echo "${no_desmontar[@]}" | grep -q "$punto_de_montaje"; then
+		notificación "$etiqueta no se desmontará." "/usr/share/icons/Papirus/128x128/apps/xfce4-fsguard-plugin-warning.svg"
+		return
+	fi
+
+	if mountpoint -q "$punto_de_montaje"; then
+		echo "$contra" | sudo -S umount "$punto_de_montaje"
+		echo "$contra" | sudo -S rm -d "$punto_de_montaje"
+		notificación "Se ha desmontado $etiqueta." "/usr/share/icons/Papirus/128x128/devices/drive-removable-media.svg"
+	fi
+}
+
+montaje() {
+	local unidad=$1
+
+	local uuid=$(lsblk -ln -o UUID,NAME | grep "$unidad" | awk '{print $1}')
+	local etiqueta=$(lsblk -n -P -o LABEL,NAME | grep "$unidad" | awk -F '"' '{print $2}')
+	local tipo=$(lsblk -n -P -o FSTYPE,NAME | grep "$unidad" | awk -F '"' '{print $2}')
+	local punto_de_montaje="/run/media/$USER/$etiqueta"
+	local opciones="rw"
+
+	if (echo "${ignorar_etiquetas[@]}" | grep -q "$etiqueta") || (echo "${ignorar_uuid[@]}" | grep -q "$uuid") || (echo "${ignorar_unidades[@]}" | grep -q "$unidad"); then
+		notificación "$etiqueta no se montará." "/usr/share/icons/Papirus/128x128/apps/rtt-rlinux.svg"
+		return
+	fi
+
+	if ( mount | grep -q "/dev/$unidad" ); then
+		notificación "$etiqueta ya está montado." "/usr/share/icons/Papirus/128x128/apps/disk-usage-analyzer.svg"
+		return
+	fi
+
+	if [[ $tipo == 'ntfs' ]]; then
+		notificación "$etiqueta es una unidad NTFS. Ejecutando reparación para evitar errores al montarlo." "/usr/share/icons/Papirus/128x128/apps/disk-utility.svg"
+		echo "$contra" | sudo -S ntfsfix -d -b "/dev/$unidad"
+		opciones+=",uid=1000,gid=1000"
+		tipo="ntfs-3g"
+	elif [[ $tipo == 'exfat' ]]; then
+		notificación "$etiqueta es una unidad exFAT. Verificando integridad..." "/usr/share/icons/Papirus/128x128/apps/disk-utility.svg"
+		echo "$contra" | sudo -S fsck.exfat -p "/dev/$unidad"
+		opciones+=",uid=1000,gid=1000,fmask=0022,dmask=0022"
+	fi
+
+	echo "$contra" | sudo -S mkdir -p "$punto_de_montaje"
+	echo "$contra" | sudo -S mount -t "$tipo" -o "$opciones" "/dev/$unidad" "$punto_de_montaje"
+
+	if [[ $tipo == 'ext4' || $tipo == 'ext3' || $tipo == 'ext2' ]]; then
+        echo "$contra" | sudo -S chown -R "$USER:" "$punto_de_montaje"
+    fi
+
+	notificación "Se ha montado $etiqueta." "/usr/share/icons/Papirus/128x128/devices/drive-removable-media.svg"
+}
+
 case $1 in
 # ------------------------------------------------------------------------------
 # Sección 1: Arranque del sistema.
@@ -158,6 +269,34 @@ case $1 in
 		motor_siguiente="${motores[$indice_siguiente]}"
 
 		fcitx5-remote -s "$motor_siguiente"
+	;;
+# ------------------------------------------------------------------------------
+# Sección 4: Control de unidades extraíbles.
+	'unidades')
+		listado_de_unidades
+
+		case $2 in
+			'montar')
+				if [[ -n "$3" ]]; then
+					montar "$3"
+				fi
+			;;
+			'desmontar')
+				if [[ -n "$3" ]]; then
+					desmontar "$3"
+				fi
+			;;
+			'montaje_de_unidades')
+				for unidad in $unidades_conectadas; do
+					montaje "$unidad"
+				done
+			;;
+			desmontaje_de_unidades)
+				for unidad in $unidades_conectadas; do
+					desmontaje "$unidad"
+				done
+			;;
+		esac
 	;;
 # ------------------------------------------------------------------------------
 # Fallback para errores.

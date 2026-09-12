@@ -723,7 +723,8 @@ def inicio_único() -> None:
 	]
 
 	inicio_síncrono: list[list[str]] = [
-		[SCRIPT, 'consola', 'reiniciar-selector']
+		[SCRIPT, 'consola', 'reiniciar-selector'],
+		[SCRIPT, 'unidades', 'montaje_de_unidades']
 	]
 
 	for comando in inicio_asíncrono:

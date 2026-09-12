@@ -34,3 +34,10 @@ alias {repo,repositorio}='cd $REPO'
 alias sm='$SM'
 alias iniciar='$SM inicio'
 alias limpiar-actualización='$SM consola limpiar-actualización'
+alias reiniciar-audio='$SM consola reiniciar-audio'
+
+# Montaje de unidades.
+alias montar='$SM unidades montar'
+alias {expulsar,desmontar}='$SM unidades desmontar'
+alias montar-todo='$SM unidades montaje_de_unidades'
+alias {expulsar-todo,desmontar-todo}='$SM unidades desmontaje_de_unidades'
