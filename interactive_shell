@@ -17,6 +17,10 @@ export REPO="$HOME/Documentos/Repositorio"
 export AUTO="$REPO/automatizado"
 export SM="$AUTO/script_maestro.sh"
 
+control_de_filtro() {
+    $SM consola filtro "$2" "$1"
+}
+
 # Sistema.
 alias reiniciar='systemctl reboot'
 alias apagar='systemctl poweroff'
@@ -35,6 +39,10 @@ alias sm='$SM'
 alias iniciar='$SM inicio ${2:-qtile-dev}'
 alias limpiar-actualización='$SM consola limpiar-actualización'
 alias reiniciar-audio='$SM consola reiniciar-audio'
+alias crear-swap='$SM consola crear-swap'
+alias borrar-swap='$SM consola borrar-swap'
+alias filtro='$SM consola filtro'
+alias probar='control_de_filtro Probando...'
 
 # Montaje de unidades.
 alias montar='$SM unidades montar'

@@ -147,6 +147,24 @@ montaje() {
 	notificación "Se ha montado $etiqueta." "/usr/share/icons/Papirus/128x128/devices/drive-removable-media.svg"
 }
 
+crear_swap() {
+	ruta="/swapfile"
+	size="${1:-2}G"
+
+	# sudo dd if=/dev/zero of="$ruta" bs=1M count=2048 status=progress
+	sudo fallocate -l "$size" "$ruta"
+	sudo chmod 600 "$ruta"
+	sudo mkswap "$ruta"
+	sudo swapon "$ruta"
+}
+
+borrar_swap() {
+	ruta="/swapfile"
+	
+	sudo swapoff "$ruta"
+	sudo rm "$ruta"
+}
+
 case $1 in
 # ------------------------------------------------------------------------------
 # Sección 1: Arranque del sistema.
@@ -165,7 +183,35 @@ case $1 in
 		esac
 	;;
 # ------------------------------------------------------------------------------
-# Sección 2: Consola.
+# Seccion 2: Método de entrada y distribución del teclado.
+	'metodo_de_entrada')
+		motores=(
+			"keyboard-latam-deadtilde"	# Español latino
+			"mozc"						# Japonés
+		)
+
+		# Motor actual
+		actual=$(fcitx5-remote -n)
+
+		# Encuentra el índice actual
+		indice=-1
+		for i in "${!motores[@]}"; do
+			if [[ "${motores[$i]}" == "$actual" ]]; then
+				indice=$i
+				break
+			fi
+		done
+
+		# Calcula el siguiente índice (con ciclo)
+		indice_siguiente=$(( (indice + 1) % ${#motores[@]} ))
+
+		# Establece el siguiente engine
+		motor_siguiente="${motores[$indice_siguiente]}"
+
+		fcitx5-remote -s "$motor_siguiente"
+	;;
+# ------------------------------------------------------------------------------
+# Sección 3: Consola.
 	'consola')
 		case "$2" in
 			reiniciar-audio)
@@ -250,35 +296,87 @@ case $1 in
 				killall -9 xdg-desktop-portal xdg-desktop-portal-gtk 2>/dev/null
 				/usr/lib/xdg-desktop-portal &
 			;;
+			'crear-swap')
+				crear_swap $3
+			;;
+			'borrar-swap')
+				borrar_swap
+			;;
+			# Filtro de visión nocturna
+			'filtro')
+				# Archivo para guardar el estado entre ejecuciones
+				texto='Temperaturas usadas:'
+				archivo_estado="/tmp/redshift_actual"
+				claro=6500
+				oscuro=2500
+				valor=$3
+
+				if [[ "$valor" =~ ^[0-9]+$ ]]; then
+					modificador=${4:-Usuario}
+
+					if [[ "$valor" -gt 25000 ]]; then
+						valor=25000
+					fi
+
+					if [[ "$valor" -lt 1000 ]]; then
+						valor=1000
+					fi
+
+					redshift -P -O "$valor"
+					notificación "Filtro: ($valor K)" "/usr/share/icons/Papirus/128x128/apps/redshift.svg"
+
+					cat << EOF > "$archivo_estado"
+$valor
+$modificador
+
+$texto
+$claro
+$oscuro
+EOF
+
+					exit 0
+				fi
+
+				modificador=${3:-Usuario}
+
+				# Se lee el estado guardado. Si no existe, valor por defecto.
+				actual=$(awk 'NR==1' "$archivo_estado" || cat << EOF > "$archivo_estado"
+6500
+Sistema
+
+$texto
+$claro
+$oscuro
+EOF
+				)
+
+				if [[ "$actual" == "$claro" ]]; then
+					redshift -P -O "$oscuro"
+					notificación "Filtro: ($oscuro K)" "/usr/share/icons/Papirus/128x128/apps/redshift.svg" 
+					
+					cat << EOF > "$archivo_estado"
+$oscuro
+$modificador
+
+$texto
+$claro
+$oscuro
+EOF
+				else
+					redshift -P -O "$claro"
+					notificación "Filtro: ($claro K)" "/usr/share/icons/Papirus/128x128/apps/redshift.svg"
+
+					cat << EOF > "$archivo_estado"
+$claro
+$modificador
+
+$texto
+$claro
+$oscuro
+EOF
+				fi
+			;;
 		esac
-	;;
-# ------------------------------------------------------------------------------
-# Seccion 3: Método de entrada y distribución del teclado.
-	'metodo_de_entrada')
-		motores=(
-			"keyboard-latam-deadtilde"	# Español latino
-			"mozc"						# Japonés
-		)
-
-		# Motor actual
-		actual=$(fcitx5-remote -n)
-
-		# Encuentra el índice actual
-		indice=-1
-		for i in "${!motores[@]}"; do
-			if [[ "${motores[$i]}" == "$actual" ]]; then
-				indice=$i
-				break
-			fi
-		done
-
-		# Calcula el siguiente índice (con ciclo)
-		indice_siguiente=$(( (indice + 1) % ${#motores[@]} ))
-
-		# Establece el siguiente engine
-		motor_siguiente="${motores[$indice_siguiente]}"
-
-		fcitx5-remote -s "$motor_siguiente"
 	;;
 # ------------------------------------------------------------------------------
 # Sección 4: Control de unidades extraíbles.
