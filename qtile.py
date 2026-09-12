@@ -270,7 +270,52 @@ AFINIDAD: dict[str, int] = {
 GROSOR_DEL_BORDE: int = 3
 COLOR_DEL_BORDE: str = COLORES['verde']
 
-LISTADO_DE_VENTANAS_ESPECIALES: list[dict[str, Any]] = []
+LISTADO_DE_VENTANAS_ESPECIALES: list[dict[str, Any]] = [
+	{
+		'titulo': 'nomacs | Image Lounge',
+		'match': {'wm_class': 'nomacs'},
+		'grosor_del_borde': 0,
+		'tipo_de_pantalla_completa': 'Especial',
+	},
+	*[
+		{
+			'titulo': app,
+			'match': {'wm_class': 'steam_app_2216184009'} if app == 'Genshin Impact' else {'title': app},
+			'área': ÁREAS[2],
+			'tipo_de_cierre': 'Forzado' if app == 'Genshin Impact' else 'Normal',
+			'tipo_de_pantalla_completa': 'Normal' if app == 'StellarBlade (Demo)  ' else 'Especial'
+		} for app in ['Genshin Impact', 'Halo: The Master Chief Collection', 'StellarBlade (Demo)  ', 'Content Warning']
+	],
+	*[
+		{
+			'titulo': app,
+			'tipo_de_ventana': 'Estática'
+		} for app in ['Reloj de Itsuki', 'Gestor de series']
+	],
+	*[
+		{
+			'titulo': app,
+			'match': {'wm_class': app},
+			'tipo_de_ventana': 'Flotante',
+			'grosor_del_borde': 0 if app == 'aimp' else GROSOR_DEL_BORDE
+		} for app in ['pavucontrol', 'aimp']
+	],
+	*[
+		{
+			'titulo': app,
+			'tipo_de_ventana': 'Flotante',
+			'tipo_de_pantalla_completa': False,
+		} for app in ['iwgtk']
+	],
+	*[
+		{
+			'titulo': app,
+			'saltar_alt_tab': True,
+			'tipo_de_ventana': 'Flotante',
+			'tipo_de_pantalla_completa': False,
+		} for app in ['Imagen en imagen', 'Imagen sobre imagen', 'Yuusha #01 - RustDesk', 'Yuusha #03 - RustDesk', 'Progreso de las operaciones de archivo']
+	],
+]
 
 VENTANAS_ESPECIALES: list[dict[str, Any]] = [
 	{
