@@ -94,11 +94,33 @@ case $1 in
 				reemplazar_con_variables_globales "$AUTO/plantilla_de_rofi" "$AUTO/rofi.rasi"
 
 				# Oh-my-posh.
-				archivo_tmp="$AUTO/plantilla.omp.json"
-				archivo_omp="$AUTO/terminal.omp.json"
+				archivo_tmp="$AUTO/temporal"
+				archivo_final="$AUTO/terminal.omp.json"
 				sed "s/WindowsUserName/$windows_user_name/g" "$AUTO/plantilla_de_omp.json" > "$archivo_tmp"
 				sed -i "s/PreferredUserName/$preferred_user_name/g" "$archivo_tmp"
-				reemplazar_con_variables_globales "$archivo_tmp" "$archivo_omp"
+				reemplazar_con_variables_globales "$archivo_tmp" "$archivo_final"
+
+				ruta="\/run\/media\/$USER\/Yuusha #12"
+				# vbam
+				archivo_final="$AUTO/vbam.ini"
+				sed "s/carpeta/$ruta/g" "$AUTO/plantilla_de_vbam" > "$archivo_tmp"
+				reemplazar_con_variables_globales "$archivo_tmp" "$archivo_final"
+
+				# MelonDS
+				archivo_final="$AUTO/melonDS_conf"
+				sed "s/carpeta/$ruta/g" "$AUTO/plantilla_de_melonds" > "$archivo_tmp"
+				reemplazar_con_variables_globales "$archivo_tmp" "$archivo_final"
+
+				# Azahar
+				archivo_final="$AUTO/azahar_config"
+				sed "s/carpeta/$ruta/g" "$AUTO/plantilla_de_azahar" > "$archivo_tmp"
+				reemplazar_con_variables_globales "$archivo_tmp" "$archivo_final"
+
+				# Ryujinx
+				archivo_final="$AUTO/ryujinx.json"
+				sed "s/carpeta/$ruta/g" "$AUTO/plantilla_de_ryujinx" > "$archivo_tmp"
+				reemplazar_con_variables_globales "$archivo_tmp" "$archivo_final"
+
 				rm -f "$archivo_tmp"
 			;;
 
