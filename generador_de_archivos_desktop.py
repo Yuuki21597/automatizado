@@ -6,7 +6,7 @@ SM: str = getenv('SM', '')
 
 datos: list[list[str]] = [
 	['advance_renamer', 'Advance Renamer', f'{SM} app advren', f'{AUTO}/imagenes/icono-advance-renamer.png'],
-	['genshin_impact', 'Genshin Impact', 'steam steam://rungameid/9518437840606724096', f'{AUTO}/imagenes/icono-genshin-impact.png'],
+	['genshin_impact', 'Genshin Impact', 'steam steam://rungameid/10029789293884473344', f'{AUTO}/imagenes/icono-genshin-impact.png'],
 	['memes', 'Memes', f'{SM} meme', f'{AUTO}/memes_y_emotes/YuunaWtf.png'],
 	['mp3tag', 'mp3tag', f'{SM} app mp3tag', f'{AUTO}/imagenes/icono-mp3tag.png'],
 	['pkvault', 'PKVault', f'{SM} app PKVault', f'{AUTO}/imagenes/icono-pkvault.svg'],

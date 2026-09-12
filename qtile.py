@@ -230,7 +230,7 @@ ULTIMA_VENTANA: Window | None = None
 ULTIMO_GRUPO: Group | Grupo | None = None
 MINIMIZADO: list[bool] = [False for área in ÁREAS]
 PANTALLA_COMPLETA: list[Window | None] = [None for área in ÁREAS]
-COMPORTAMIENTO_DE_ALT_TAB: str = 'Default'
+COMPORTAMIENTO_DE_ALT_TAB: str = 'Pantalla estática'
 ROTAR_ALT_TAB_EN_EL_GRUPO: bool = False
 GUARDADO_DE_CAPTURAS: bool = False
 
@@ -280,7 +280,7 @@ LISTADO_DE_VENTANAS_ESPECIALES: list[dict[str, Any]] = [
 	*[
 		{
 			'titulo': app,
-			'match': {'wm_class': 'steam_app_2216184009'} if app == 'Genshin Impact' else {'title': app},
+			'match': {'wm_class': 'steam_app_2335242297'} if app == 'Genshin Impact' else {'title': app},
 			'área': ÁREAS[2],
 			'tipo_de_cierre': 'Forzado' if app == 'Genshin Impact' else 'Normal',
 			'tipo_de_pantalla_completa': 'Normal' if app == 'StellarBlade (Demo)  ' else 'Especial'
@@ -743,7 +743,7 @@ keys: list[Key] = [
 	Key(
 		[],
 		'F11',
-		lazy.window.toggle_fullscreen(),
+		lazy.function(pantalla_completa),
 		desc = 'Activa y desactiva la pantalla completa de la ventana activa.'
 	),
 	Key(
