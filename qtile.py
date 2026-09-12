@@ -547,6 +547,10 @@ def enfocar_grupo(gestor: Core, grupo: Group | Grupo) -> None:
 	except Exception as error:
 		notificación(f'Error: {error}')
 
+def mover_ventana_a_grupo(gestor: Core, grupo: Group) -> None:
+	gestor.current_window.togroup(grupo.name, switch_group = False)
+	enfocar_grupo(gestor, grupo)
+
 def alt_tab(gestor: Core, tipo: str | None = None) -> None:
 	global ROTAR_ALT_TAB_EN_EL_GRUPO, PANTALLA_COMPLETA
 	ventanas: list[Window] = listado_de_ventanas(gestor = gestor, un_solo_grupo = ROTAR_ALT_TAB_EN_EL_GRUPO, excluir_minimizados = True)
@@ -735,7 +739,7 @@ keys: list[Key] = [
 	Key(
 		['mod1'],
 		'F4',
-		lazy.window.kill(),
+		lazy.function(cerrar_ventana),
 		desc = 'Cierra la ventana activa.'
 	),
 	Key(
@@ -799,26 +803,26 @@ for indice, área in enumerate(groups):
 			Key(
 				['mod4'],
 				str(indice + 1),
-				lazy.group[área.name].toscreen(),
+				lazy.funcion(enfocar_grupo, grupo = área),
 				desc = f'Cambia al área de trabajo "{área.name}".'
 			),
 			Key(
 				['mod4'],
 				TECLADO_NUMÉRICO[f'Numpad{indice + 1}'],
-				lazy.group[área.name].toscreen(),
+				lazy.funcion(enfocar_grupo, grupo = área),
 				desc = f'Cambia al área de trabajo "{área.name}".'
 			),
 			# 'mod4' + Shift + número del área de trabajo = mueve la ventana activa a esa área.
 			Key(
 				['mod4', 'Shift'],
 				str(indice + 1),
-				lazy.window.togroup(área.name, switch_group = True),
+				lazy.function(mover_ventana_a_grupo, grupo = área),
 				desc = f'Mueve la ventana activa al área de trabajo "{área.name}".'
 			),
 			Key(
 				['mod4', 'Shift'],
 				TECLADO_NUMÉRICO[f'Numpad{indice + 1}'],
-				lazy.window.togroup(área.name, switch_group = True),
+				lazy.function(mover_ventana_a_grupo, grupo = área),
 				desc = f'Mueve la ventana activa al área de trabajo "{área.name}".'
 			)
 		]
