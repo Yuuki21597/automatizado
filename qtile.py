@@ -586,6 +586,28 @@ def alt_tab(gestor: Core, tipo: str | None = None) -> None:
 
 	grupo_de_ventana.focus(ventanas[indice], False)
 
+def posicionado_estático(ventana: Window) -> None:
+	global RESOLUCIONES, ALTURA_DE_LA_BARRA
+	pantalla_preferida = 0
+	x: int | None = None
+	y: int | None = None
+
+	if ventana.name == ventanas_estáticas[0]:
+		if hay_mas_de_una_pantalla():
+			pantalla_preferida = 0
+
+		x = RESOLUCIONES[pantalla_preferida][0] - ventana.width
+		y = RESOLUCIONES[pantalla_preferida][1] - ventana.height
+
+	if ventana.name in ventanas_estáticas[1:]:
+		if hay_mas_de_una_pantalla():
+			pantalla_preferida = 1
+
+		x = 0
+		y = ALTURA_DE_LA_BARRA + 4
+	
+	ventana.static(pantalla_preferida, x, y, ventana.width, ventana.height)
+
 def control_de_layouts(grupo: Group | Grupo) -> None:
 	if isinstance(grupo.layout, NoneType): raise TypeError('¡El layout es None!')
 	if grupo.layout.name == 'max': return
@@ -1087,6 +1109,16 @@ def inicio_recurrente() -> None:
 	cambiar_manejo_de_capturas(primera_vez = True)
 	cambiar_estado_alt_tab(primera_vez = True)
 	notificación('Configuración lista.')
+
+@hook.subscribe.client_new
+def nueva_ventana(ventana: Window):
+	if ventana.name in ventanas_estáticas:
+		posicionado_estático(ventana)
+
+@hook.subscribe.client_name_updated
+def nombre_actualizado(ventana: Window):
+	if ventana.name in ventanas_flotantes and not ventana.floating:
+		ventana.toggle_floating()
 
 @hook.subscribe.client_focus
 def ventana_enfocada(ventana: Window):
