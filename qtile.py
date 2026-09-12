@@ -220,6 +220,7 @@ MOSTRAR_BARRAS: list[bool] = [True for x in range(len(MONITORES))]
 	'Juegos'
 ]
 
+ULTIMA_VENTANA: Window | None = None
 MINIMIZADO: list[bool] = [False for área in ÁREAS]
 PANTALLA_COMPLETA: list[Window | None] = [None for área in ÁREAS]
 COMPORTAMIENTO_DE_ALT_TAB: str = 'Default'
@@ -288,7 +289,7 @@ LISTADO_DE_LAYOUTS: list[qtileLayout] = [
 		new_client_position = 'bottom',
 		**ESPECIFICACIONES
 	),
-	layout.RatioTile(
+	RatioTile(
 		**ESPECIFICACIONES
 	),
 	layout.Matrix(
@@ -545,6 +546,30 @@ def alt_tab(gestor: Core, tipo: str | None = None) -> None:
 
 	grupo_de_ventana.focus(ventanas[indice], False)
 
+def control_de_layouts(grupo: Group | Grupo) -> None:
+	if isinstance(grupo.layout, NoneType): raise TypeError('¡El layout es None!')
+	if grupo.layout.name == 'max': return
+
+	ventanas: list[Window] = listado_de_ventanas(gestor = grupo.qtile, un_solo_grupo = True, grupo = grupo, excluir_flotantes = True, excluir_minimizados = True)
+	no_ventanas: int = len(ventanas)
+	control: float = no_ventanas ** 0.5
+
+	if no_ventanas < 4:
+		grupo.use_layout(0)
+	elif no_ventanas > 3 and control.is_integer():
+		grupo.use_layout(2)
+		for x in range(
+			min(grupo.layout.columns, int(control)),
+			max(grupo.layout.columns, int(control))
+		):
+			if int(control) > grupo.layout.columns:
+				grupo.layout.add()
+			else:
+				grupo.layout.delete()
+
+	else:
+		grupo.use_layout(1)
+
 # ------------------------------------------------------------------------------
 # Atajos de teclado.
 
@@ -785,6 +810,19 @@ def inicio_único() -> None:
 
 	for comando in inicio_síncrono:
 		subproceso(comando)
+
+@hook.subscribe.client_focus
+def ventana_enfocada(ventana: Window):
+	global ULTIMA_VENTANA
+	if ventana == ULTIMA_VENTANA: return
+	ULTIMA_VENTANA = ventana
+
+	if isinstance(ventana.group, NoneType): raise TypeError('¡El grupo es None!')
+	control_de_layouts(ventana.group)
+
+	if not ventana.fullscreen and ventana.recuperar_fullscreen:
+		ventana.recuperar_fullscreen = False
+		pantalla_completa(ventana.group.qtile, ventana)
 
 # ------------------------------------------------------------------------------
 # Configuración por defecto.
