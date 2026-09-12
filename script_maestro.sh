@@ -301,6 +301,11 @@ case $1 in
 			'borrar-swap')
 				borrar_swap
 			;;
+			'historial-de-tiradas-de-genshin')
+				sudo pacman -S jq
+				"$AUTO/historial_de_genshin.sh"
+				sudo pacman -Rns jq
+			;;
 			# Filtro de visión nocturna
 			'filtro')
 				# Archivo para guardar el estado entre ejecuciones
