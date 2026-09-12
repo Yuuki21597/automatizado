@@ -14,7 +14,7 @@ import sys
 lib = f'{getenv('REPO', '')}/librerias'
 sys.path.append(lib)
 
-from lib_recursos_nativos import notificación as nt
+from lib_recursos_nativos import notificación as nt, pipas
 
 from libqtile.layout.base import Layout as qtileLayout
 from libqtile import layout, qtile as Core, bar, widget, resources, hook
@@ -188,7 +188,9 @@ CLICK_IZQUIERDO: str = 'Button1'
 CLICK_CENTRAL: str = 'Button2'
 CLICK_DERECHO: str = 'Button3'
 
+HOME: str = getenv('HOME', '')
 AUTO: str = getenv('AUTO', '')
+IMÁGENES: str = f'{HOME}/Imágenes'
 SCRIPT: str = getenv('SM', '')
 ÍCONO: str = f'{AUTO}/imagenes/icono-qtile.png'
 
@@ -199,6 +201,14 @@ def notificación(mensaje: str, icono: str = ÍCONO, título: str = 'Qtile', des
 	nt(mensaje, icono, título, 'normal', desktop_entry)
 
 # ------------------------------------------------------------------------------
+
+PORTAPAPELES: str = 'copyq copy'
+FORMATO: str = 'image/png -'
+COMANDOS_MAIM: dict[str, str] = {
+	'pantalla_completa': f'maim',
+	'selección': f'maim -s',
+	'ventana': f'maim -i WID',
+}
 
 TAMAÑO_DE_LOS_ÍCONOS: int = 18
 ALTURA_DE_LA_BARRA: int = TAMAÑO_DE_LOS_ÍCONOS + (2 * 2)
@@ -214,6 +224,7 @@ MINIMIZADO: list[bool] = [False for área in ÁREAS]
 PANTALLA_COMPLETA: list[Window | None] = [None for área in ÁREAS]
 COMPORTAMIENTO_DE_ALT_TAB: str = 'Default'
 ROTAR_ALT_TAB_EN_EL_GRUPO: bool = False
+GUARDADO_DE_CAPTURAS: bool = False
 
 MARGEN_GENERAL: int = 3
 
@@ -341,6 +352,29 @@ for ventana in VENTANAS_ESPECIALES:
 		ventanas_con_pantalla_completa_especial.append(titulo)
 	elif not tipo_de_pantalla_completa:
 		ventanas_sin_pantalla_completa.append(titulo)
+
+# ------------------------------------------------------------------------------
+# Sistema de captura de pantalla.
+
+def capturar_pantalla(gestor: Core, caso: int = 1) -> None:
+	global PORTAPAPELES, FORMATO, GUARDADO_DE_CAPTURAS, COMANDOS_MAIM
+
+	comando: str = ''
+	coletilla: str = f'{PORTAPAPELES} {FORMATO}' if not GUARDADO_DE_CAPTURAS else f'{IMÁGENES}/maim.png'
+	
+	if (hay_mas_de_una_pantalla() and caso == 1) or (not hay_mas_de_una_pantalla() and caso == 2):
+		comando = f'{COMANDOS_MAIM['ventana'].replace('WID', str(gestor.current_window.wid))} | {coletilla}'
+
+	elif (hay_mas_de_una_pantalla() and caso == 2) or (not hay_mas_de_una_pantalla() and caso == 1):
+		comando = f'{COMANDOS_MAIM['pantalla_completa']} | {coletilla}'
+	elif caso == 3:
+		comando = f'{COMANDOS_MAIM['selección']} | {coletilla}'
+
+	if not GUARDADO_DE_CAPTURAS:
+		pipas(*comando.split(' | '))
+	else:
+		comando = comando.replace(' | ', ' ')
+		subproceso(comando.split(' '))
 
 # ------------------------------------------------------------------------------
 # Control de ventanas.
@@ -544,9 +578,22 @@ keys: list[Key] = [
 		lazy.window.toggle_fullscreen(),
 		desc = 'Activa y desactiva la pantalla completa de la ventana activa.'
 	),
+	Key(
+		[],
+		'Print',
+		lazy.function(capturar_pantalla, caso = 1),
+		desc = 'Toma una captura de pantalla y la copia al portapapeles.'
+	),
 
 	# --------------------------------------------------------------------------
 	# Atajos con Shift.
+
+	Key(
+		['Shift'],
+		'Print',
+		lazy.function(capturar_pantalla, caso = 3),
+		desc = 'Toma una captura de pantalla y la copia al portapapeles.',
+	),
 
 	# --------------------------------------------------------------------------
 	# Atajos con Control.
@@ -571,6 +618,12 @@ keys: list[Key] = [
 		'F4',
 		lazy.window.kill(),
 		desc = 'Cierra la ventana activa.'
+	),
+	Key(
+		['mod1'],
+		'Print',
+		lazy.function(capturar_pantalla, caso = 2),
+		desc = 'Toma una captura de pantalla y la copia al portapapeles.',
 	),
 
 	# --------------------------------------------------------------------------
