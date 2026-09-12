@@ -21,6 +21,16 @@ control_de_filtro() {
     $SM consola filtro "$2" "$1"
 }
 
+qtile() {
+	local DEV_QTILE="$REPO/entornos/qtile-env/bin/qtile"
+
+	if [ "$ENTORNO" == 'qtile-dev' ] && [ -f "$DEV_QTILE" ]; then
+		"$DEV_QTILE" "$@"
+	else
+		command qtile "$@"
+	fi
+}
+
 # Sistema.
 alias reiniciar='systemctl reboot'
 alias apagar='systemctl poweroff'
@@ -36,7 +46,7 @@ alias {repo,repositorio}='cd $REPO'
 
 # Atajos para comandos del script maestro.
 alias sm='$SM'
-alias iniciar='$SM inicio ${2:-qtile-dev}'
+alias iniciar='$SM inicio'
 alias limpiar-actualización='$SM consola limpiar-actualización'
 alias reiniciar-audio='$SM consola reiniciar-audio'
 alias crear-swap='$SM consola crear-swap'

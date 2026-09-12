@@ -473,6 +473,24 @@ EOF
 		esac
 	;;
 # ------------------------------------------------------------------------------
+# Sección 7: Aplicaciones desde código.
+	'codigo-fuente')
+		case $2 in
+			'qtile')
+				if ! [ -d "$REPO/qtile" ]; then
+					git clone https://github.com/qtile/qtile
+				fi
+
+				if ! [ -d "$REPO/entornos" ]; then
+					python -m venv "$REPO/entornos/qtile-env"
+				fi
+
+				source "$REPO/entornos/qtile-env/bin/activate"
+				cd "$REPO/qtile"
+				pip install -e .
+		esac
+	;;
+# ------------------------------------------------------------------------------
 # Fallback para errores.
 	*)
 		echo "Primer argumento desconocido."
