@@ -8,7 +8,7 @@ from libqtile.backend.x11.core import Core as X11Core
 from libqtile.backend.base.window import Window as WindowBase
 from libqtile.layout.ratiotile import RatioTile as RTBase
 from typing import Any
-from os import listdir, path as os_ruta, getenv
+from os import listdir, path as os_ruta, getenv, kill as os_cierre
 
 import sys
 lib = f'{getenv('REPO', '')}/librerias'
@@ -586,6 +586,23 @@ def alt_tab(gestor: Core, tipo: str | None = None) -> None:
 			PANTALLA_COMPLETA[gestor.groups.index(grupo_de_ventana)] = None
 
 	grupo_de_ventana.focus(ventanas[indice], False)
+
+def cerrar_ventana(gestor: Core) -> None:
+	ventana: Window = gestor.current_window
+	if not ventana:
+		return
+
+	if ventana.name in ventanas_de_cierre_forzado:
+		os_cierre(ventana.get_pid(), 9)
+		return
+
+	if ventana.name in [*ventanas_de_cierre_especial, *ventanas_que_no_se_cierran]:
+		ventana.toggle_minimize()
+
+		if ventana.name in ventanas_que_no_se_cierran:
+			return
+
+	ventana.kill()
 
 def posicionado_estático(ventana: Window) -> None:
 	global RESOLUCIONES, ALTURA_DE_LA_BARRA
