@@ -32,7 +32,7 @@ alias {repo,repositorio}='cd $REPO'
 
 # Atajos para comandos del script maestro.
 alias sm='$SM'
-alias iniciar='$SM inicio'
+alias iniciar='$SM inicio ${2:-qtile-dev}'
 alias limpiar-actualización='$SM consola limpiar-actualización'
 alias reiniciar-audio='$SM consola reiniciar-audio'
 

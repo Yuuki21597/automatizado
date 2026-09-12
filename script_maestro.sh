@@ -9,13 +9,23 @@ if [[ -f "$ENTORNO" ]]; then
 fi
 
 nt() {
-	N_ScriptName=${3:-(basename "$0")}
-	args=("-i" "$2" "$N_ScriptName" "$1")
-	if [[ -z $4 ]]; then
-		notify-send ${args[@]}
-	else
-		notify-send -h "$4" ${args[@]}
-	fi
+	local N_ScriptName="${3:-$(basename "$0")}"
+    local icono="$2"
+    local mensaje="$1"
+    local hint="$4"
+	local args=()
+
+	if [[ -n "$icono" ]]; then
+        args+=("-i" "$icono")
+    fi
+
+	if [[ -n "$hint" ]]; then
+        args+=("-h" "$hint")
+    fi
+
+	args+=("$N_ScriptName" "$mensaje")
+
+	notify-send "${args[@]}"
 }
 
 notificación() {
