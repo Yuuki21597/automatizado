@@ -1178,6 +1178,15 @@ def grupo_cambiado():
 	
 	ULTIMO_GRUPO = grupo
 
+@hook.subscribe.shutdown
+def apagado():
+	ejecutar_al_cierre: list[list[str]] = [
+		['rm', '-f', '/tmp/redshift_actual'],
+	]
+
+	for comando in ejecutar_al_cierre:
+		subproceso(comando)
+
 # ------------------------------------------------------------------------------
 # Configuración por defecto.
 
@@ -1223,9 +1232,12 @@ floating_layout: qtileLayout = layout.Floating(
 		Match(wm_class="ssh-askpass"),  # ssh-askpass
 		Match(title="branchdialog"),  # gitk
 		Match(title="pinentry"),  # GPG key password entry
+		*[
+			Match(**ventana['match']) for ventana in VENTANAS_ESPECIALES if ventana.get('tipo_de_ventana') == 'Flotante'
+		]
 	],
-	border_focus = COLORES['verde'],
-	border_width = 3
+	border_focus = COLOR_CONDICIONAL_DEL_BORDE,
+	border_width = GROSOR_CONDICIONAL_DEL_BORDE
 )
 floats_kept_above: bool = False
 focus_on_window_activation: str = 'never'
