@@ -446,6 +446,33 @@ EOF
 		fi
 	;;
 # ------------------------------------------------------------------------------
+# Sección 6: Aplicaciones.
+	'app')
+		pkprefix="$HOME/.local/share/wineprefixes/PKHex"
+
+		case $2 in
+			'PKHex')
+				WINEPREFIX="$pkprefix" renderer="vulkan" wine "$REPO/aplicaciones/pokehex/PKHeX.exe"
+			;;
+			'PKVault')
+				dev="true"
+
+				if [ "$dev" == "true" ]; then
+					cd "$REPO/PKVault/PKVault.Desktop"
+					WEBKIT_DISABLE_COMPOSITING_MODE=1 dotnet run /p:AllowMissingPrunePackageData=true
+				else
+					WEBKIT_DISABLE_COMPOSITING_MODE=1 "$REPO/aplicaciones/pkvault_app"
+				fi
+			;;
+			'advren')
+				WINEPREFIX="$pkprefix" renderer="vulkan" wine "$REPO/aplicaciones/advanced renamer/aren.exe"
+			;;
+			'mp3tag')
+				WINEPREFIX="$pkprefix" renderer="vulkan" wine "$REPO/aplicaciones/mp3tag/Mp3tag.exe"
+			;;
+		esac
+	;;
+# ------------------------------------------------------------------------------
 # Fallback para errores.
 	*)
 		echo "Primer argumento desconocido."
