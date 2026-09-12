@@ -53,6 +53,7 @@ alias crear-swap='$SM consola crear-swap'
 alias borrar-swap='$SM consola borrar-swap'
 alias filtro='$SM consola filtro'
 alias probar='control_de_filtro Probando...'
+alias compilar-mpv='$SM codigo-fuente mpv'
 
 # Montaje de unidades.
 alias montar='$SM unidades montar'

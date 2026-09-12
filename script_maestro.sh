@@ -478,6 +478,7 @@ EOF
 		case $2 in
 			'qtile')
 				if ! [ -d "$REPO/qtile" ]; then
+					cd "$REPO"
 					git clone https://github.com/qtile/qtile
 				fi
 
@@ -488,6 +489,22 @@ EOF
 				source "$REPO/entornos/qtile-env/bin/activate"
 				cd "$REPO/qtile"
 				pip install -e .
+				deactivate
+			;;
+			'mpv')
+				sudo pacman -S --needed lua luajit libxpresent
+				
+				if ! [ -d "$REPO/mpv" ]; then
+					cd "$REPO"
+					git clone https://github.com/mpv-player/mpv-build.git
+				fi
+
+				cd "$REPO/mpv-build"
+				sudo pacman -S meson nasm vulkan-headers yt-dlp
+				./rebuild -j6
+				sudo ./install
+				sudo pacman -Rns meson nasm vulkan-headers yt-dlp
+			;;
 		esac
 	;;
 # ------------------------------------------------------------------------------
