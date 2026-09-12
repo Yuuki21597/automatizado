@@ -227,6 +227,7 @@ MOSTRAR_BARRAS: list[bool] = [True for x in range(len(MONITORES))]
 ]
 
 ULTIMA_VENTANA: Window | None = None
+ULTIMO_GRUPO: Group | Grupo | None = None
 MINIMIZADO: list[bool] = [False for área in ÁREAS]
 PANTALLA_COMPLETA: list[Window | None] = [None for área in ÁREAS]
 COMPORTAMIENTO_DE_ALT_TAB: str = 'Default'
@@ -631,6 +632,20 @@ def control_de_layouts(grupo: Group | Grupo) -> None:
 
 	else:
 		grupo.use_layout(1)
+
+def trasladar_flotante(grupo: Group | Grupo) -> None:
+	global ULTIMO_GRUPO
+
+	if isinstance(ULTIMO_GRUPO, NoneType): raise TypeError('¡El grupo es None!')
+	if ULTIMO_GRUPO.screen is not None: return
+	ventanas = ULTIMO_GRUPO.windows
+
+	for ventana in ventanas:
+		if ventana.name in ('Imagen en imagen', 'Imagen sobre imagen'):
+			ventana.togroup(grupo.name)
+			ventana.bring_to_front()
+
+	grupo.focus(grupo.windows[0])
 
 # ------------------------------------------------------------------------------
 # Atajos de teclado.
@@ -1132,6 +1147,19 @@ def ventana_enfocada(ventana: Window):
 	if not ventana.fullscreen and ventana.recuperar_fullscreen:
 		ventana.recuperar_fullscreen = False
 		pantalla_completa(ventana.group.qtile, ventana)
+
+@hook.subscribe.setgroup
+def grupo_cambiado():
+	global ULTIMO_GRUPO
+
+	grupo = Core.current_group
+	if ULTIMO_GRUPO is None:
+		ULTIMO_GRUPO = grupo
+		return
+
+	trasladar_flotante(grupo)
+	
+	ULTIMO_GRUPO = grupo
 
 # ------------------------------------------------------------------------------
 # Configuración por defecto.
