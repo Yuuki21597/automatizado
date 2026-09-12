@@ -214,14 +214,14 @@ case $1 in
 # Sección 3: Consola.
 	'consola')
 		case "$2" in
-			reiniciar-audio)
+			'reiniciar-audio')
 				systemctl --user stop wireplumber.service
 				# systemctl --user start wireplumber.service
 				sleep 2
 				pactl set-sink-volume @DEFAULT_SINK@ 67%
 			;;
 
-			limpiar-actualización)
+			'limpiar-actualización')
 				gestor="yay"
 
 				if ! (command -v "$gestor" &>/dev/null); then
@@ -252,11 +252,11 @@ case $1 in
 				fi
 			;;
 			
-			reemplazar-comodines)
+			'reemplazar-comodines')
 				reemplazar_con_variables_globales "$3" "$4"
 			;;
 
-			generar-configuración)
+			'generar-configuración')
 				# Rofi.
 				reemplazar_con_variables_globales "$AUTO/plantilla_de_rofi" "$AUTO/rofi.rasi"
 
@@ -290,8 +290,7 @@ case $1 in
 
 				rm -f "$archivo_tmp"
 			;;
-
-			reiniciar-selector)
+			'reiniciar-selector')
 				dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP
 				killall -9 xdg-desktop-portal xdg-desktop-portal-gtk 2>/dev/null
 				/usr/lib/xdg-desktop-portal &
@@ -399,12 +398,52 @@ EOF
 					montaje "$unidad"
 				done
 			;;
-			desmontaje_de_unidades)
+			'desmontaje_de_unidades')
 				for unidad in $unidades_conectadas; do
 					desmontaje "$unidad"
 				done
 			;;
 		esac
+	;;
+# ------------------------------------------------------------------------------
+# Sección 5: Seleccionador de memes.
+	'meme')
+		directorio="$AUTO/memes_y_emotes"
+
+		if [[ ! -d "$directorio" ]]; then
+			notificación "No se encontró la carpeta de memes."
+			exit 1
+		fi
+		
+		lista_de_memes=$(
+			find "$directorio" -type f | while read -r file; do
+				filename=$(basename "$file")
+				echo -e "${filename}"
+			done
+		)
+
+		seleccion=$(echo -e "$lista_de_memes" | rofi -dmenu -p "Memes" -i -theme "android_notification")
+
+		echo "$seleccion"
+		
+		if [[ -n "$seleccion" ]]; then
+			ruta_completa="$directorio/$seleccion"
+			echo "$ruta_completa"
+			if [[ -f "$ruta_completa" ]]; then
+				extension=$(file --mime-type -b "$ruta_completa")
+				if [[ "$extension" == "image/gif" ]]; then
+					copyq write text/uri-list "file://$ruta_completa"
+				else
+					copyq write "$extension" - < "$ruta_completa"
+				fi
+
+				copyq select 0
+				copyq paste
+				notificación "$seleccion" "$ruta_completa" "Meme pegado"
+			else
+				notificación "No se pudo encontrar el archivo del meme seleccionado." "" "Error"
+			fi
+		fi
 	;;
 # ------------------------------------------------------------------------------
 # Fallback para errores.

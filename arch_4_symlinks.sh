@@ -32,6 +32,8 @@ ln -sf "$AUTO/picom.conf" "$HOME/.config/picom/picom.conf"
 # Rofi
 mkdir -p "$HOME/.config/rofi"
 ln -sf "$AUTO/rofi.rasi" "$HOME/.config/rofi/config.rasi"
+# Aplicaciones.
+ln -sf "$AUTO/accesos_directos" "$HOME/.local/share/applications"
 
 # Cursores y temas de íconos.
 ln -sf "$AUTO/gtk2.0" "$HOME/.config/gtkrc-2.0"

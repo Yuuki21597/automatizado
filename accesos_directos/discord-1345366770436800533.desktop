@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Game 1345366770436800533
+Exec=/usr/bin/azahar %u
+Type=Application
+NoDisplay=true
+Categories=Discord;Games;
+MimeType=x-scheme-handler/discord-1345366770436800533;

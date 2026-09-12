@@ -1,0 +1,10 @@
+[MIME Cache]
+application/vnd.ms-opentype=com.github.FontManager.FontViewer.desktop;
+application/x-font-otf=com.github.FontManager.FontViewer.desktop;
+application/x-font-ttf=com.github.FontManager.FontViewer.desktop;
+font/otf=com.github.FontManager.FontViewer.desktop;
+font/sfnt=com.github.FontManager.FontViewer.desktop;
+font/ttc=com.github.FontManager.FontViewer.desktop;
+font/ttf=com.github.FontManager.FontViewer.desktop;
+x-scheme-handler/discord-1345366770436800533=discord-1345366770436800533.desktop;
+x-scheme-handler/discord-455712169795780630=discord-455712169795780630.desktop;
