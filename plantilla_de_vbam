@@ -41,7 +41,7 @@ LinkPort=5738
 GBADarken=37
 [General]
 AutoLoadLastState=0
-BatteryDir=$AUTO/partidas_guardadas
+BatteryDir=$REPO/partidas_guardadas
 FreezeRecent=0
 RecordingDir=
 RewindInterval=0

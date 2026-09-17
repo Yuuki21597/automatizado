@@ -10,7 +10,7 @@ datos: list[list[str]] = [
 	['memes', 'Memes', f'{SM} meme', f'{AUTO}/memes_y_emotes/YuunaWtf.png'],
 	['mp3tag', 'mp3tag', f'{SM} app mp3tag', f'{AUTO}/imagenes/icono-mp3tag.png'],
 	['pkvault', 'PKVault', f'{SM} app PKVault', f'{AUTO}/imagenes/icono-pkvault.svg'],
-	['pkhex', 'PKHex', f'{SM} app PKHex', f'{AUTO}/imagenes/icono-pkhex.png'],
+	['pkhex', 'PKHeX', f'{SM} app PKHeX', f'{AUTO}/imagenes/icono-pkhex.png'],
 ]
 
 entradas_de_menu: list = [

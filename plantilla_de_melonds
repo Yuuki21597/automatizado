@@ -22,7 +22,7 @@ Device = "wlan0"
 
 [Instance0]
 CheatFilePath = ""
-SaveFilePath = "carpeta/partidas_guardadas"
+SaveFilePath = "$REPO/partidas_guardadas"
 JoystickID = 0
 SavestatePath = ""
 EnableCheats = false

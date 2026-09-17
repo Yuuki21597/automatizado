@@ -848,13 +848,13 @@ for indice, área in enumerate(groups):
 			Key(
 				['mod4'],
 				str(indice + 1),
-				lazy.funcion(enfocar_grupo, grupo = área),
+				lazy.function(enfocar_grupo, grupo = área),
 				desc = f'Cambia al área de trabajo "{área.name}".'
 			),
 			Key(
 				['mod4'],
 				TECLADO_NUMÉRICO[f'Numpad{indice + 1}'],
-				lazy.funcion(enfocar_grupo, grupo = área),
+				lazy.function(enfocar_grupo, grupo = área),
 				desc = f'Cambia al área de trabajo "{área.name}".'
 			),
 			# 'mod4' + Shift + número del área de trabajo = mueve la ventana activa a esa área.

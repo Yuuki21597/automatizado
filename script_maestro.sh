@@ -173,7 +173,6 @@ case $1 in
 			'qtile'|'qtile-dev')
 				startx "$HOME/.xinitrc" "$2" "$@"
 			;;
-
 			*)
 				mensaje="Entorno de escritorio desconocido: $2"
 				echo "$mensaje"
@@ -220,7 +219,6 @@ case $1 in
 				sleep 2
 				pactl set-sink-volume @DEFAULT_SINK@ 67%
 			;;
-
 			'limpiar-actualización')
 				gestor="yay"
 
@@ -251,11 +249,14 @@ case $1 in
 					echo "No hay paquetes por eliminar instalados."
 				fi
 			;;
-			
+			'actualizar-azahar')
+				crear_swap
+				MAKEFLAGS="-j4" yay -S azahar-git
+				borrar_swap
+			;;
 			'reemplazar-comodines')
 				reemplazar_con_variables_globales "$3" "$4"
 			;;
-
 			'generar-configuración')
 				# Rofi.
 				reemplazar_con_variables_globales "$AUTO/plantilla_de_rofi" "$AUTO/rofi.rasi"
@@ -267,26 +268,36 @@ case $1 in
 				sed -i "s/PreferredUserName/$preferred_user_name/g" "$archivo_tmp"
 				reemplazar_con_variables_globales "$archivo_tmp" "$archivo_final"
 
+				# vbam.
 				ruta="\/run\/media\/$USER\/Yuusha #12"
-				# vbam
 				archivo_final="$AUTO/vbam.ini"
 				sed "s/carpeta/$ruta/g" "$AUTO/plantilla_de_vbam" > "$archivo_tmp"
 				reemplazar_con_variables_globales "$archivo_tmp" "$archivo_final"
+				mkdir -p "$HOME/.config/visualboyadvance-m"
+				ln -sf "$AUTO/vbam.ini" "$HOME/.config/visualboyadvance-m/vbam.ini"
 
-				# MelonDS
+				# MelonDS.
 				archivo_final="$AUTO/melonDS_conf"
 				sed "s/carpeta/$ruta/g" "$AUTO/plantilla_de_melonds" > "$archivo_tmp"
 				reemplazar_con_variables_globales "$archivo_tmp" "$archivo_final"
 
-				# Azahar
+				# Azahar.
 				archivo_final="$AUTO/azahar_config"
 				sed "s/carpeta/$ruta/g" "$AUTO/plantilla_de_azahar" > "$archivo_tmp"
 				reemplazar_con_variables_globales "$archivo_tmp" "$archivo_final"
 
-				# Ryujinx
+				# Ryujinx.
 				archivo_final="$AUTO/ryujinx.json"
 				sed "s/carpeta/$ruta/g" "$AUTO/plantilla_de_ryujinx" > "$archivo_tmp"
 				reemplazar_con_variables_globales "$archivo_tmp" "$archivo_final"
+
+				# Configuración de Pkfinder.
+				archivo_final="$AUTO/pkfinder.conf"
+				reemplazar_con_variables_globales "$AUTO/plantilla_de_pkfinder" "$archivo_final"
+
+				# Perfiles de Pkfinder.
+				archivo_final="$AUTO/pkfinder-profiles.json"
+				reemplazar_con_variables_globales "$AUTO/plantilla_de_perfiles_pkfinder" "$archivo_final"
 
 				rm -f "$archivo_tmp"
 			;;
@@ -300,6 +311,13 @@ case $1 in
 			;;
 			'borrar-swap')
 				borrar_swap
+			;;
+			'commit-akiyu')
+				if [ "$PWD" != "$HOME/Documentos/Arte" ]; then
+					cd "$HOME/Documentos/Arte"
+				fi
+				git stage --all
+				GIT_AUTHOR_DATE="$3" GIT_COMMITTER_DATE="$3" git commit -m "$4"
 			;;
 			'historial-de-tiradas-de-genshin')
 				sudo pacman -S jq
@@ -453,10 +471,10 @@ EOF
 # ------------------------------------------------------------------------------
 # Sección 6: Aplicaciones.
 	'app')
-		pkprefix="$HOME/.local/share/wineprefixes/PKHex"
+		pkprefix="$HOME/.local/share/wineprefixes/PKHeX"
 
 		case $2 in
-			'PKHex')
+			'PKHeX')
 				WINEPREFIX="$pkprefix" renderer="vulkan" wine "$REPO/aplicaciones/pokehex/PKHeX.exe"
 			;;
 			'PKVault')
