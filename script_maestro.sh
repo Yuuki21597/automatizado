@@ -502,7 +502,7 @@ EOF
 			'qtile')
 				if ! [ -d "$REPO/qtile" ]; then
 					cd "$REPO"
-					git clone https://github.com/qtile/qtile
+					git clone https://github.com/qtile/qtile.git
 				fi
 
 				if ! [ -d "$REPO/entornos" ]; then
@@ -528,11 +528,52 @@ EOF
 				sudo ./install
 				sudo pacman -Rns meson nasm vulkan-headers yt-dlp
 			;;
+			'pkvault')
+				sudo pacman -S --needed webkit2gtk-4.1 dotnet-sdk aspnet-runtime nodejs npm
+
+				ruta_base="$REPO/PKVault"
+
+				if ! [ -d "$ruta_base" ]; then
+					cd "$REPO"
+					git clone https://github.com/Yuuki21597/PKVault.git
+				fi
+
+				# 1 - Preparación general
+				cd "$ruta_base"
+				cd PKVault.Backend
+				dotnet publish /p:AllowMissingPrunePackageData=true
+				cd ../frontend
+				npm install
+				npm run gen:sdk
+
+				tipo="${3:-escritorio}"
+				argumento="/p:AllowMissingPrunePackageData=true"
+
+				# 2a - Web app
+				if [ "$tipo" == "web-app" ]; then
+					dotnet run "$argumento"
+					npm run dev
+					# De aquí busca la dirección localhost para correr la app en un navegador.
+
+				# 2b - Aplicación de escritorio.
+				elif [ "$tipo" == "escritorio" ]; then
+					cd "$ruta_base"
+					make apps-prepare
+					cd PKVault.Desktop
+					WEBKIT_DISABLE_COMPOSITING_MODE=1 dotnet run "$argumento"
+				else
+					mensaje="Tipo de aplicación desconocido."
+					echo "$mensaje"
+					notificación "$mensaje"
+					exit 1
+				fi
+			;;
 		esac
 	;;
 # ------------------------------------------------------------------------------
 # Fallback para errores.
 	*)
 		echo "Primer argumento desconocido."
+		exit 1
 	;;
 esac

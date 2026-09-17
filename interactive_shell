@@ -58,6 +58,7 @@ alias commit-akiyu='$SM consola commit-akiyu'
 alias filtro='$SM consola filtro'
 alias probar='control_de_filtro Probando...'
 alias compilar-mpv='$SM codigo-fuente mpv'
+alias compilar-pkvault='$SM codigo-fuente pkvault'
 
 # Montaje de unidades.
 alias montar='$SM unidades montar'
