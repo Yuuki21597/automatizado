@@ -1172,7 +1172,8 @@ def inicio_único() -> None:
 	subproceso(RESOLUCIÓN.split())
 
 	inicio_asíncrono: list[list[str]] = [
-		[SCRIPT, 'consola', 'reiniciar-audio']
+		[SCRIPT, 'consola', 'reiniciar-audio'],
+		[f'{REPO}/entornos/scripts/bin/python', f'{REPO}/reloj_de_anime/main.py'],
 	]
 
 	inicio_síncrono: list[list[str]] = [

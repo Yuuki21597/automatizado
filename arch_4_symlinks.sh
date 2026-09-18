@@ -29,7 +29,7 @@ ln -sf "$AUTO/kitty.conf" "$HOME/.config/kitty/kitty.conf"
 mkdir -p "$HOME/.config/picom"
 ln -sf "$AUTO/picom.conf" "$HOME/.config/picom/picom.conf"
 
-# Rofi
+# Rofi.
 mkdir -p "$HOME/.config/rofi"
 ln -sf "$AUTO/rofi.rasi" "$HOME/.config/rofi/config.rasi"
 # Aplicaciones.
@@ -63,13 +63,16 @@ ln -sf "$AUTO/dunst" "$HOME/.config/dunst/dunstrc"
 ln -sf "$AUTO/fcitx5-config" "$HOME/.config/fcitx5/config"
 ln -sf "$AUTO/fcitx5-profile" "$HOME/.config/fcitx5/profile"
 
-# Oh-my-posh-git
+# Oh-my-posh-git.
 mkdir -p "$HOME/.config/oh-my-posh"
 ln -sf "$AUTO/terminal.omp.json" "$HOME/.config/oh-my-posh/$USER.omp.json"
 
-# mpv
+# mpv.
 mkdir -p "$HOME/.config/mpv"
 ln -sf "$AUTO/mpv.conf" "$HOME/.config/mpv/mpv.conf"
 ln -sf "$AUTO/mpv_input.conf" "$HOME/.config/mpv/input.conf"
 mkdir -p "$HOME/.config/mpv/script-opts"
 ln -sf "$AUTO/mpv_osc.conf" "$HOME/.config/mpv/script-opts/osc.conf"
+
+# Reloj de imagen.
+ln -sf "$REPO/reloj_de_anime/configuración_del_reloj.json" "$HOME/.config/img_clock_conf.json"
