@@ -1,0 +1,5 @@
+brightnessctl
+lib32-vulkan-mesa-implicit-layers
+lib32-vulkan-intel
+lib32-libdisplay-info
+lib32-xcb-util-keysyms
