@@ -239,7 +239,8 @@ ESPACIADOR: int = 5
 
 CARPETAS_DE_FONDOS: list[Any] = []
 FONDOS_DE_PANTALLA: list[str] = [
-	os_ruta.join(os_ruta.dirname(resources.__file__), 'logo.png')
+	f'{AUTO}/imagenes/logo-qtile.svg',
+	f'{AUTO}/imagenes/xfce-x.svg',
 ]
 FONDOS_USADOS: set[Any] = set()
 
