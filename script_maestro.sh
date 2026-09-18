@@ -514,6 +514,12 @@ EOF
 				pip install -e .
 				deactivate
 			;;
+			'batería')
+				if ! [ -d "$REPO/pale-battery-icons_for_qtile" ] && [ "$NOMBRE_EQUIPO" == "Yuusha #03" ] ; then
+					cd "$REPO"
+					git clone https://github.com/yantene/pale-battery-icons_for_qtile.git
+				fi
+			;;
 			'mpv')
 				sudo pacman -S --needed lua luajit libxpresent
 				
