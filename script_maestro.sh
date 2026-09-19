@@ -538,25 +538,26 @@ EOF
 				sudo pacman -S --needed webkit2gtk-4.1 dotnet-sdk aspnet-runtime nodejs npm
 
 				ruta_base="$REPO/PKVault"
+				primera_vez="false"
+				argumento="/p:AllowMissingPrunePackageData=true"
 
 				if ! [ -d "$ruta_base" ]; then
 					cd "$REPO"
-					git clone https://github.com/Yuuki21597/PKVault.git
+					git clone --recurse-submodules https://github.com/Yuuki21597/PKVault.git
+					primera_vez="true"
 				fi
 
 				# 1 - Preparación general
-				cd "$ruta_base"
-				cd PKVault.Backend
-				dotnet publish /p:AllowMissingPrunePackageData=true
-				cd ../frontend
+				cd "$ruta_base/PKVault.Backend"
+				dotnet publish "$argumento"
+				cd "$ruta_base/frontend"
 				npm install
 				npm run gen:sdk
 
 				tipo="${3:-escritorio}"
-				argumento="/p:AllowMissingPrunePackageData=true"
 
 				# 2a - Web app
-				if [ "$tipo" == "web-app" ]; then
+				if [ "$tipo" == "web-app" ] || [ "$primera_vez" == "true" ]; then
 					dotnet run "$argumento"
 					npm run dev
 					# De aquí busca la dirección localhost para correr la app en un navegador.
