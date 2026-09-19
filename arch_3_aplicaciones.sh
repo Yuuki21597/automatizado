@@ -156,7 +156,7 @@ $gestor base-devel
 if ! command -v yay > /dev/null; then
 	git clone https://aur.archlinux.org/yay.git
 	# Si llegase a fallar por algo relacionado con connection refused, es porque el DNS no puede resolver el nombre. Se arregla exportando de nuevo el enlace simbólico para systemd.
-	sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+	sudo ln -sfn /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 	cd yay
 	makepkg -si
 	rm -rf yay

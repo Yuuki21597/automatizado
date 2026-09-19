@@ -22,7 +22,7 @@ echo "KEYMAP=la-latin1" > /etc/vconsole.conf
 export LANG=es_GT.UTF-8
 
 # Luego ajustamos la hora para evitar cualquier problema que al internet pueda sucederle por tener hora asíncrona. No parece ser algo común, pero mejor prevenir.
-ln -sf /usr/share/zoneinfo/America/Guatemala /etc/localtime
+ln -sfn /usr/share/zoneinfo/America/Guatemala /etc/localtime
 timedatectl set-local-rtc 1 --adjust-system-clock
 hwclock --systohc
 

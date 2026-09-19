@@ -113,7 +113,7 @@ arch-chroot /mnt /bin/bash <<EOF
 systemctl enable iwd
 systemctl enable systemd-networkd
 systemctl enable systemd-resolved
-ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+ln -sfn /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 
 cat <<EOT > /etc/systemd/network/20-wired.network
 [Match]
