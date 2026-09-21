@@ -22,6 +22,8 @@ ln -sfn "$AUTO/ryujinx.json" "$HOME/.config/Ryujinx/Config.json"
 
 # Partidas.
 
+mkdir -p "$HOME/.local/share/dolphin-emu/GC/EUR/Card A"
+
 # Pokémon Box: Rubí y Zafiro
 ln -sfn "$REPO/partidas_guardadas/021 - Pokémon Box Rubí y Zafiro.gci" "$HOME/.local/share/dolphin-emu/GC/EUR/Card A/01-GPXP-pokemon_rs_memory_box.gci"
 
