@@ -594,8 +594,11 @@ def enfocar_grupo(gestor: Core, grupo: Group | Grupo) -> None:
 		notificación(f'Error: {error}')
 
 def mover_ventana_a_grupo(gestor: Core, grupo: Group) -> None:
-	gestor.current_window.togroup(grupo.name, switch_group = False)
+	ventana: Window = gestor.current_window
+	ventana.togroup(grupo.name)
 	enfocar_grupo(gestor, grupo)
+	if not isinstance(ventana.group, (Grupo, Group)): raise NotImplementedError
+	ventana.group.focus(ventana, False)
 
 def alt_tab(gestor: Core, tipo: str | None = None) -> None:
 	global ROTAR_ALT_TAB_EN_EL_GRUPO, PANTALLA_COMPLETA
