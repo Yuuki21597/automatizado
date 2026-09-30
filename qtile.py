@@ -1197,17 +1197,17 @@ def inicio_recurrente() -> None:
 	notificación('Configuración lista.')
 
 @hook.subscribe.client_new
-def nueva_ventana(ventana: Window):
+def nueva_ventana(ventana: Window) -> None:
 	if ventana.name in ventanas_estáticas:
 		posicionado_estático(ventana)
 
 @hook.subscribe.client_name_updated
-def nombre_actualizado(ventana: Window):
+def nombre_actualizado(ventana: Window) -> None:
 	if ventana.name in ventanas_flotantes and not ventana.floating:
 		ventana.toggle_floating()
 
 @hook.subscribe.client_focus
-def ventana_enfocada(ventana: Window):
+def ventana_enfocada(ventana: Window) -> None:
 	global ULTIMA_VENTANA
 	if ventana == ULTIMA_VENTANA: return
 	ULTIMA_VENTANA = ventana
@@ -1220,7 +1220,7 @@ def ventana_enfocada(ventana: Window):
 		pantalla_completa(ventana.group.qtile, ventana)
 
 @hook.subscribe.setgroup
-def grupo_cambiado():
+def grupo_cambiado() -> None:
 	global ULTIMO_GRUPO
 
 	grupo = Core.current_group
@@ -1233,7 +1233,7 @@ def grupo_cambiado():
 	ULTIMO_GRUPO = grupo
 
 @hook.subscribe.shutdown
-def apagado():
+def apagado() -> None:
 	ejecutar_al_cierre: list[list[str]] = [
 		['rm', '-f', '/tmp/redshift_actual'],
 	]
@@ -1273,7 +1273,7 @@ layout.Floating.default_float_rules = [
 	Match(wm_class="toolbar"),
 	Match(role="pop-up"),
 	Match(func=lambda c: c.has_fixed_size()),
-	Match(func=lambda c: c.has_fixed_ratio())
+	# Match(func=lambda c: c.has_fixed_ratio())
 ]
 
 floating_layout: qtileLayout = layout.Floating(
