@@ -226,6 +226,7 @@ MOSTRAR_BARRAS: list[bool] = [True for x in range(len(MONITORES))]
 	'Juegos'
 ]
 
+VENTANAS_ESTATICAS: list[Window] = []
 ULTIMA_VENTANA: Window | None = None
 ULTIMO_GRUPO: Group | Grupo | None = None
 MINIMIZADO: list[bool] = [False for área in ÁREAS]
@@ -658,7 +659,7 @@ def cerrar_ventana(gestor: Core) -> None:
 	ventana.kill()
 
 def posicionado_estático(ventana: Window) -> None:
-	global RESOLUCIONES, ALTURA_DE_LA_BARRA
+	global RESOLUCIONES, ALTURA_DE_LA_BARRA, VENTANAS_ESTATICAS
 	pantalla_preferida = 0
 	x: int | None = None
 	y: int | None = None
@@ -678,6 +679,7 @@ def posicionado_estático(ventana: Window) -> None:
 		y = ALTURA_DE_LA_BARRA + 4
 	
 	ventana.static(pantalla_preferida, x, y, ventana.width, ventana.height)
+	VENTANAS_ESTATICAS.append(ventana)
 
 def control_de_layouts(grupo: Group | Grupo) -> None:
 	if isinstance(grupo.layout, NoneType): raise TypeError('¡El layout es None!')
@@ -1231,6 +1233,15 @@ def grupo_cambiado() -> None:
 	trasladar_flotante(grupo)
 	
 	ULTIMO_GRUPO = grupo
+
+@hook.subscribe.screens_reconfigured
+def reconfiguración_de_pantallas() -> None:
+	global VENTANAS_ESTATICAS
+	ventanas_a_configurar: list[Window] = VENTANAS_ESTATICAS.copy()
+	VENTANAS_ESTATICAS = []
+
+	for ventana in ventanas_a_configurar:
+		posicionado_estático(ventana)
 
 @hook.subscribe.shutdown
 def apagado() -> None:
