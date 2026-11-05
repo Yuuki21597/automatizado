@@ -46,37 +46,37 @@ coletilla="data/00000001"
 
 # Pokémon Y.
 mkdir -p "$rutas_azahar/00055e00/$coletilla"
-ln -sfn "$REPO/partidas_guardadas/066 - Pokémon Y" "$rutas_azahar/00055e00/$coletilla/main"
+ln -sfn "$REPO/partidas_guardadas/065 - Pokémon Y" "$rutas_azahar/00055e00/$coletilla/main"
 
 # Pokémon Rubí Omega.
 mkdir -p "$rutas_azahar/0011c400/$coletilla"
-ln -sfn "$REPO/partidas_guardadas/071 - Pokémon Rubí Omega" "$rutas_azahar/0011c400/$coletilla/main"
+ln -sfn "$REPO/partidas_guardadas/069 - Pokémon Rubí Omega" "$rutas_azahar/0011c400/$coletilla/main"
 
 # 0011c500 --> Pokémon Zafiro Alfa
 
 # Pokémon Sol.
 mkdir -p "$rutas_azahar/00164800/$coletilla"
-ln -sfn "$REPO/partidas_guardadas/078 - Pokémon Sol" "$rutas_azahar/00164800/$coletilla/main"
+ln -sfn "$REPO/partidas_guardadas/076 - Pokémon Sol" "$rutas_azahar/00164800/$coletilla/main"
 
 # Pokémon Ultraluna.
 mkdir -p "$rutas_azahar/001b5100/$coletilla"
-ln -sfn "$REPO/partidas_guardadas/082 - Pokémon Ultraluna" "$rutas_azahar/001b5100/$coletilla/main"
+ln -sfn "$REPO/partidas_guardadas/079 - Pokémon Ultraluna" "$rutas_azahar/001b5100/$coletilla/main"
 
 # ??? --> Pokémon Let's Go! Eevee # Es injugable mientras no descubra cómo lanzar Pokébolas.
 
 rutas_ryujinx="$HOME/.config/Ryujinx/bis/user/save"
 # Pokémon Escudo.
 mkdir -p "$rutas_ryujinx/0000000000000001"
-ln -sfn "$REPO/partidas_guardadas/088 - Pokémon Escudo" "$rutas_ryujinx/0000000000000001"
+ln -sfn "$REPO/partidas_guardadas/084 - Pokémon Escudo" "$rutas_ryujinx/0000000000000001"
 
 # ??? --> Pokémon Perla Reluciente (Supongo...)
 
 # Leyendas Pokémon: Arceus.
 mkdir -p "$rutas_ryujinx/0000000000000009"
-ln -sfn "$REPO/partidas_guardadas/095 - Pokémon Leyendas Arceus" "$rutas_ryujinx/0000000000000009"
+ln -sfn "$REPO/partidas_guardadas/090 - Pokémon Leyendas Arceus" "$rutas_ryujinx/0000000000000009"
 
 # Pokémon Púrpura.
 mkdir -p "$rutas_ryujinx/0000000000000005"
-ln -sfn "$REPO/partidas_guardadas/097 - Pokémon Púrpura" "$rutas_ryujinx/0000000000000005"
+ln -sfn "$REPO/partidas_guardadas/092 - Pokémon Púrpura" "$rutas_ryujinx/0000000000000005"
 
 # ??? --> Pokémon Leyendas: Z-A

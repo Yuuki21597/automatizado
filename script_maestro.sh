@@ -135,7 +135,10 @@ montaje() {
 		notificación "$etiqueta es una unidad exFAT. Verificando integridad..." "/usr/share/icons/Papirus/128x128/apps/disk-utility.svg"
 		echo "$contra" | sudo -S fsck.exfat -p "/dev/$unidad"
 		opciones+=",uid=1000,gid=1000,fmask=0022,dmask=0022"
-	fi
+	elif [[ $tipo == 'fat32' || $tipo == 'vfat' ]]; then
+        opciones+=",uid=1000,gid=1000,umask=0022"
+        tipo="vfat"
+    fi
 
 	echo "$contra" | sudo -S mkdir -p "$punto_de_montaje"
 	echo "$contra" | sudo -S mount -t "$tipo" -o "$opciones" "/dev/$unidad" "$punto_de_montaje"
@@ -482,9 +485,9 @@ EOF
 
 				if [ "$dev" == "true" ]; then
 					cd "$REPO/PKVault/PKVault.Desktop"
-					WEBKIT_DISABLE_COMPOSITING_MODE=1 dotnet run /p:AllowMissingPrunePackageData=true
+					WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 dotnet run /p:AllowMissingPrunePackageData=true
 				else
-					WEBKIT_DISABLE_COMPOSITING_MODE=1 "$REPO/aplicaciones/pkvault_app"
+					WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 "$REPO/aplicaciones/pkvault_app"
 				fi
 			;;
 			'advren')
@@ -567,7 +570,7 @@ EOF
 					cd "$ruta_base"
 					make apps-prepare
 					cd PKVault.Desktop
-					WEBKIT_DISABLE_COMPOSITING_MODE=1 dotnet run "$argumento"
+					WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 dotnet run "$argumento"
 				else
 					mensaje="Tipo de aplicación desconocido."
 					echo "$mensaje"
