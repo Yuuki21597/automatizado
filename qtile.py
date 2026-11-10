@@ -1181,6 +1181,14 @@ def inicio_único() -> None:
 		[f'{REPO}/entornos/scripts/bin/python', f'{REPO}/reloj_de_anime/main.py'],
 	]
 
+
+	if NOMBRE_EQUIPO in ('Yuusha #03'):
+		inicio_asíncrono.extend(
+			[
+				[f'{AUTO}/bateria_aviso.sh'],
+			]
+		)
+
 	inicio_síncrono: list[list[str]] = [
 		[SCRIPT, 'consola', 'reiniciar-selector'],
 		[SCRIPT, 'unidades', 'montaje_de_unidades']
