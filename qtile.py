@@ -265,6 +265,11 @@ COLORES: dict[str, str] = {
 	'verde': '#366959'
 }
 
+COLOR_SWITCH: dict[str, str] = {
+	'encendido': COLORES['naranja'],
+	'apagado': COLORES['blanco']
+}
+
 AFINIDAD: dict[str, int] = {
 	ÁREAS[1]: 1,
 }
@@ -928,7 +933,7 @@ def cambiar_estado_alt_tab(primera_vez = False) -> None:
 		ROTAR_ALT_TAB_EN_EL_GRUPO = not ROTAR_ALT_TAB_EN_EL_GRUPO
 
 	for pantalla in gestor.screens:
-		actualizar_widget(gestor, pantalla.index, 'Tipo de Alt + Tab', COLORES['blanco'], COLORES['verde'], ROTAR_ALT_TAB_EN_EL_GRUPO)
+		actualizar_widget(gestor, pantalla.index, 'Tipo de Alt + Tab', COLOR_SWITCH['apagado'], COLOR_SWITCH['encendido'], ROTAR_ALT_TAB_EN_EL_GRUPO)
 
 	mensaje: str = 'Alt + Tab global.' if not ROTAR_ALT_TAB_EN_EL_GRUPO else 'Alt + Tab por grupo.'
 	notificación(mensaje)
@@ -942,7 +947,7 @@ def cambiar_manejo_de_capturas(primera_vez = False) -> None:
 		GUARDADO_DE_CAPTURAS = not GUARDADO_DE_CAPTURAS
 
 	for pantalla in gestor.screens:
-		actualizar_widget(gestor, pantalla.index, 'Capturas de pantalla', COLORES['negro'], COLORES['blanco'], GUARDADO_DE_CAPTURAS)
+		actualizar_widget(gestor, pantalla.index, 'Capturas de pantalla', COLOR_SWITCH['encendido'], COLOR_SWITCH['apagado'], GUARDADO_DE_CAPTURAS)
 
 	mensaje = 'Capturas guardadas en el portapapeles.' if not GUARDADO_DE_CAPTURAS else 'Capturas guardadas en un archivo.'
 	notificación(mensaje)
@@ -1001,8 +1006,8 @@ def barra(tipo: str, pantalla: int) -> list[Any]:
 				),
 				qe_wid.CurrentLayout(
 					name = 'Control de layout',
-					background = COLORES['naranja'],
-					foreground = COLORES['negro'],
+					background = COLORES['azul'],
+					foreground = COLORES['blanco'],
 					icon_first = True,
 					mode = 'both',
 					mouse_callbacks = {
@@ -1013,8 +1018,8 @@ def barra(tipo: str, pantalla: int) -> list[Any]:
 					padding = 7,
 				),
 				qe_wid.TextBox(
-					background = COLORES['blanco'],
-					foreground = COLORES['negro'],
+					background = COLORES['morado'],
+					foreground = COLORES['blanco'],
 					mouse_callbacks = {
 						CLICK_IZQUIERDO: lazy.spawn('rofi -show combi'),
 						CLICK_DERECHO: lazy.spawn('rofi -show combi'),
@@ -1043,8 +1048,8 @@ def barra(tipo: str, pantalla: int) -> list[Any]:
 					urgent_border = COLORES['rojo'],
 				),
 				qe_wid.TextBox(
-					background = COLORES['blanco'],
-					foreground = COLORES['negro'],
+					background = COLORES['naranja'],
+					foreground = COLORES['blanco'],
 					mouse_callbacks = {
 						CLICK_IZQUIERDO: cambiar_manejo_de_capturas
 					},
@@ -1052,7 +1057,7 @@ def barra(tipo: str, pantalla: int) -> list[Any]:
 					text = '📷'
 				),
 				qe_wid.TextBox(
-					background = COLORES['verde'],
+					background = COLORES['naranja'],
 					foreground = COLORES['blanco'],
 					mouse_callbacks = {
 						CLICK_IZQUIERDO: cambiar_estado_alt_tab
@@ -1077,13 +1082,13 @@ def barra(tipo: str, pantalla: int) -> list[Any]:
 			listado.extend(
 				[
 					qe_wid.BatteryIcon(
-						background = COLORES['morado'],
+						background = COLORES['verde'],
 						update = 2,
 						theme_path = f'{REPO}/pale-battery-icons_for_qtile',
 					),
 					qe_wid.Battery(
 						name = 'Batería',
-						background = COLORES['morado'],
+						background = COLORES['verde'],
 						format = '{percent:2.0%}'
 					)
 				]
@@ -1093,7 +1098,7 @@ def barra(tipo: str, pantalla: int) -> list[Any]:
 			listado.extend(
 				[
 					qe_wid.Systray(
-						background = COLORES['azul'],
+						background = COLORES['gris_claro'],
 						icon_size = TAMAÑO_DE_LOS_ÍCONOS,
 						padding = 4
 					)
