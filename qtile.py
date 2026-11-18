@@ -999,6 +999,30 @@ def barra(tipo: str, pantalla: int) -> list[Any]:
 						)
 					]
 				),
+				qe_wid.CurrentLayout(
+					name = 'Control de layout',
+					background = COLORES['naranja'],
+					foreground = COLORES['negro'],
+					icon_first = True,
+					mode = 'both',
+					mouse_callbacks = {
+						CLICK_IZQUIERDO: lazy.next_layout(),
+						CLICK_DERECHO: lazy.prev_layout(),
+					},
+					scale = 0.7,
+					padding = 7,
+				),
+				qe_wid.TextBox(
+					background = COLORES['blanco'],
+					foreground = COLORES['negro'],
+					mouse_callbacks = {
+						CLICK_IZQUIERDO: lazy.spawn('rofi -show combi'),
+						CLICK_DERECHO: lazy.spawn('rofi -show combi'),
+						CLICK_CENTRAL: lazy.spawn('rofi -show combi'),
+					},
+					name = 'Botón de inicio',
+					text = ' 🐧'
+				),
 				qe_wid.TaskList(
 					border = COLORES['verde'],
 					borderwidth = 0,
@@ -1017,18 +1041,6 @@ def barra(tipo: str, pantalla: int) -> list[Any]:
 					txt_maximized = '',
 					txt_floating = '🗗',
 					urgent_border = COLORES['rojo'],
-				),
-				qe_wid.CurrentLayout(
-					background = COLORES['naranja'],
-					foreground = COLORES['negro'],
-					icon_first = True,
-					mode = 'both',
-					mouse_callbacks = {
-						CLICK_IZQUIERDO: lazy.next_layout(),
-						CLICK_DERECHO: lazy.prev_layout(),
-					},
-					scale = 0.7,
-					padding = 7,
 				),
 				qe_wid.TextBox(
 					background = COLORES['blanco'],
@@ -1092,6 +1104,10 @@ def barra(tipo: str, pantalla: int) -> list[Any]:
 				background = COLORES['transparente'],
 				length = MARGEN_GENERAL * 2
 			)
+
+		control_1: bool = False
+		control_2: bool = False
+		
 		for indice, elemento in enumerate(listado):
 			if indice == 0:
 				widgets.append(widget_margen)
@@ -1125,17 +1141,29 @@ def barra(tipo: str, pantalla: int) -> list[Any]:
 				widgets.append(elemento)
 				widgets.append(widget_2)
 			else:
-				if elemento.name not in ('Barra de tareas', 'Batería'):
+				if elemento.name == 'Batería':
+					control_1 = False
+
+				if elemento.name == 'Capturas de pantalla': 
+					control_2 = True
+
+				if control_1:
 					w_esp = qe_wid.Spacer(
 						background = listado[indice - 1].background,
 						length = ESPACIADOR,
 						decorations = [
 							PowerLineDecoration(
-								path = 'arrow_right',
+								path = 'arrow_right' if control_2 else 'arrow_left'
 							)
 						]
 					)
+
 					widgets.append(w_esp)
+
+				if elemento.name == 'Control de layout':
+					control_1 = True
+				if elemento.name == 'Batería':
+					control_1 = True
 				
 				widgets.append(elemento)
 
