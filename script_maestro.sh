@@ -207,7 +207,7 @@ case $1 in
 					gestor="pacman"
 				fi
 
-				paquetes_listados=("go" "yay-debug" "oh-my-posh-git-debug" "cubeb-debug" "zahar-git-debug" "nomacs-debug" "catch2" "aimp-debug" "iwgtk-debug" "jq" "oniguruma" "adwaita-fonts" "gnu-free-fonts" "ttf-jetbrains-mono")
+				paquetes_listados=("go" "yay-debug" "oh-my-posh-git-debug" "cubeb-debug" "zahar-git-debug" "nomacs-debug" "catch2" "aimp-debug" "iwgtk-debug" "jq" "oniguruma" "adwaita-fonts" "gnu-free-fonts" "ttf-jetbrains-mono" "noto-fonts" "noto-fonts-extra")
 
 				huerfanos=()
 				mapfile -t huerfanos < <($gestor -Qdttq 2>/dev/null)
