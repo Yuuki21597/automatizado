@@ -1278,6 +1278,10 @@ def grupo_cambiado() -> None:
 @hook.subscribe.screens_reconfigured
 def reconfiguración_de_pantallas() -> None:
 	global VENTANAS_ESTATICAS
+	
+	cambiar_manejo_de_capturas(primera_vez = True)
+	cambiar_estado_alt_tab(primera_vez = True)
+
 	ventanas_a_configurar: list[Window] = VENTANAS_ESTATICAS.copy()
 	VENTANAS_ESTATICAS = []
 
